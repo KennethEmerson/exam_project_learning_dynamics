@@ -18,7 +18,9 @@ class Agent:
     """
     Abstract agent.
     """
-    def __init__(self, learning_rate: float, discount_rate: float, temperature: float, initial_state: State, initial_q_value=0.0):
+
+    def __init__(self, learning_rate: float, discount_rate: float, temperature: float, initial_state: State,
+                 initial_q_value=0.0, theta=None):
         """
         Initialize an agent.
 
@@ -27,6 +29,8 @@ class Agent:
         :param temperature: The temperature (Boltzmann tau)
         :param initial_state: The initial state
         :param initial_q_value: The initial values of the Q-table
+        :param theta: The theta for the internal model (None if the
+            internal model is not used).
         """
         self.q_table = dict()
         self.initial_q_value = initial_q_value
@@ -34,21 +38,35 @@ class Agent:
         self.discount_rate = discount_rate
         self.temperature = temperature
         self.state = initial_state
+        self.theta = theta
 
-    def get_q_value(self, action: int) -> float:
+    def get_q_value(self, action: int, other_action: int=None) -> float:
         """
         Get the q value based on the current state.
 
         :param action: The action taken.
+        :param other_action: The other player action (None if
+            ignored).
 
         :return: The q value.
         """
-        qIndex = (self.state.rel_position, self.state.other_rel_position, action)
+        qIndex = (self.state.rel_position, self.state.other_rel_position, action, other_action)
         if qIndex in self.q_table:
             return self.q_table[qIndex]
         else:
             self.q_table[qIndex] = self.initial_q_value
             return self.initial_q_value
+
+    def update_q_value(self, q_value: float, action: int, other_action=None):
+        """
+        Update the Q-table (for the state we are in).
+
+        :param q_value: The new Q-value.
+        :param action: The action done.
+        :param other_action: The other agent action (ignored if None).
+        """
+        qIndex = (self.state.rel_position, self.state.other_rel_position, action, other_action)
+        self.q_table[qIndex] = q_value
 
     def set_state(self, state: State):
         """
@@ -58,19 +76,25 @@ class Agent:
         """
         self.state = state
 
-    def update(self, new_state: State, action: int, reward: float) -> None:
+    def update(self, new_state: State, action: int, reward: float, other_action: int = None) -> None:
         """
         Update the agent.
 
         :param new_state: The new state the agent is in.
         :param action: The action done by the agent (MOVE_*).
         :param reward: The reward obtained.
+        :param other_action: The other agent accent (might
+            be ignored depending on the agent).
         """
-        qIndex = (self.state.rel_position, self.state.other_rel_position, action)
-        qValue = self.get_q_value(action)  # create & initialize it if it doesn't exist
+        if self.theta is None:
+            other_action = None
 
-        self.q_table[qIndex] = (1 - self.learning_rate) * qValue \
-                               + self.learning_rate * (reward + self.discount_rate * self.max_EV_next(new_state))
+        qValue = self.get_q_value(action, other_action)  # create & initialize it if it doesn't exist
+
+        qValue = (1 - self.learning_rate) * qValue\
+                 + self.learning_rate * (reward + self.discount_rate * self.max_EV_next(new_state))
+
+        self.update_q_value(qValue, action, other_action)
 
         self.state = new_state
 
@@ -106,19 +130,19 @@ class Agent:
         """
         global NB_MOVES
         # @TODO: take into account the prey moves (if it changes something?)
-        evMax = None
+        ev_max = None
         for action in range(NB_MOVES):
             own_position = self.compute_new_position(action, new_state.rel_position)
             for other_action in range(NB_MOVES):
                 other_position = self.compute_new_position(other_action, new_state.other_rel_position)
 
                 state = State(own_position, other_position)
-                ev = self.expected_value(state, action)
+                ev = self.predict_reward(state, action)
 
-                if evMax is None or ev > evMax:
-                    evMax = ev
+                if ev_max is None or ev > ev_max:
+                    ev_max = ev
 
-        return evMax
+        return ev_max
 
     def boltzmann(self) -> int:
         """
@@ -127,7 +151,7 @@ class Agent:
 
         :return: The action chosen (MOVE_*)
         """
-        probas = [np.exp(self.get_q_value(action) / self.temperature) for action in range(NB_MOVES)]
+        probas = [np.exp(self.expected_value(action) / self.temperature) for action in range(NB_MOVES)]
         tot = sum(probas)
         probas = [p / tot for p in probas]
 
@@ -143,18 +167,34 @@ class Agent:
         """
         return self.boltzmann()
 
-    def expected_value(self, state: State, action: int) -> float:
+    def predict_reward(self, future_state: State, action: int):
         """
-        Compute the expected value for an action on a given state.
+        Predict the reward if we go into future_state by
+        doing the specified action.
+
+        :param future_state: The future state to be in.
+        :param action: The action done to get into that
+            state.
+
+        :return: The predicted reward.
+        """
+        print("predict_reward() must be implemented.")
+        return 0.0
+
+    def expected_value(self, action: int) -> float:
+        """
+        Compute the expected value for an action for the current
+        state (used by the boltzmann function).
+
         Note: need to be overwritten.
 
-        :param state: The state.
         :param action: The action (i.e. MOVE_*)
 
         :return: The expected value.
         """
         print("expected_value() must be implemented.")
         return 0.0
+
 
 if __name__ == "__main__":
     alpha = 0.1
