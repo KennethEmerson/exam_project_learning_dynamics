@@ -122,6 +122,7 @@ def test():
 
     for i in range(0,4):
         int_model.update_state_action_estimation(state,0,learning_episode=1)
+        print(int_model.get_state_action_estimation(state,0))
         print(int_model.get_action_prob(state))
     
     for i in range(0,4):
