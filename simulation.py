@@ -42,10 +42,8 @@ def test():
         print(f"hunter 2 action: {hunter_2_action}")
         print(f"score:{score}")
 
-        hunter_1.update(game.get_state_hunter_1(),hunter_1_action,score,hunter_2_action)
-        hunter_2.update(game.get_state_hunter_2(),hunter_2_action,score,hunter_1_action)
-        hunter_1.internal_model.update_state_action_estimation(game.get_state_hunter_1(),hunter_2_action,episode)
-        hunter_2.internal_model.update_state_action_estimation(game.get_state_hunter_1(),hunter_2_action,episode)
+        hunter_1.update(game.get_state_hunter_1(),hunter_1_action,score,hunter_2_action,episode)
+        hunter_2.update(game.get_state_hunter_2(),hunter_2_action,score,hunter_1_action,episode)
 
 
 if __name__ == "__main__":

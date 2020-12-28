@@ -170,13 +170,13 @@ def test():
   penalty = -1
   
   test_game =  Game(playing_field,reward,penalty,dict_action_to_coord,prey_action_prob) 
-  #print()
-  #print(f"initial position prey: {test_game.prey_position}")  
-  #print(f"initial position hunter 1: {test_game.hunter_1_position}")  
-  #print(f"initial position hunter 2: {test_game.hunter_2_position}\n")  
-  #print(test_game.get_relative_locations())
-  print(type(test_game.get_state().rel_position))
-  """for i in range(0,8): 
+  print()
+  print(f"initial position prey: {test_game.prey_position}")  
+  print(f"initial position hunter 1: {test_game.hunter_1_position}")  
+  print(f"initial position hunter 2: {test_game.hunter_2_position}\n")  
+  print(test_game.get_relative_locations())
+  
+  for i in range(0,8): 
     hunter_1_action = 0
     hunter_2_action = 1
     print(test_game.play(hunter_1_action,hunter_2_action))
@@ -185,6 +185,6 @@ def test():
     print(f"position hunter 1: {test_game.hunter_1_position}")  
     print(f"position hunter 2: {test_game.hunter_2_position}") 
     print(f"relative positions hunters: {test_game.get_relative_locations()}")
-"""
+
 if __name__ == "__main__":
     test()

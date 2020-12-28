@@ -62,6 +62,19 @@ class Qwpae_Agent(Agent):
         action_other_optimal = np.argmax(self.internal_model.get_action_prob(future_state))
         return self.get_q_value_with_random_state(future_state,action,action_other_optimal)
 
+    def update(self, new_state: State, action: int, reward: float, other_action: int,episode=1) -> None:
+        """
+        Update the agent.
+
+        :param new_state: The new state the agent is in.
+        :param action: The action done by the agent (MOVE_*).
+        :param reward: The reward obtained.
+        :param other_action: The other agent action
+        :param episode: the episode of the game
+        """
+
+        super().update(new_state,action,reward,other_action)
+        self.internal_model.update_state_action_estimation(new_state,other_action,episode)
 
 def test():
     alpha = 0.1
