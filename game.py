@@ -1,4 +1,5 @@
 import numpy as np
+from agent import State
 
 class Game:
     """class to create and interact with the game environment
@@ -81,6 +82,25 @@ class Game:
         
         return rel_loc_hunter_1,rel_loc_hunter_2
     
+    # ADDED on 28/12 KE
+    def get_state_hunter_1(self):
+        """return a state object with the current relative locations hunter 1
+
+        Returns:
+            [State]: state object with the current relative locations
+        """
+        rel_loc_hunter_1,rel_loc_hunter_2 = self.get_relative_locations()
+        return State(tuple(rel_loc_hunter_1),tuple(rel_loc_hunter_2))
+    
+    # ADDED on 28/12 KE
+    def get_state_hunter_2(self):
+        """return a state object with the current relative locations for hunter 2 (rel positions are inversed)
+
+        Returns:
+            [State]: state object with the current relative locations
+        """
+        rel_loc_hunter_1,rel_loc_hunter_2 = self.get_relative_locations()
+        return State(tuple(rel_loc_hunter_2),tuple(rel_loc_hunter_1))
 
     def check_score(self):
         """
@@ -135,7 +155,7 @@ class Game:
             prey_action = np.random.choice(self.prey_action_prob.size, p=self.prey_action_prob)
             self.prey_position = self.update_position(prey_old_position,prey_action)
         
-        return self.get_relative_locations(),self.check_score() 
+        return hunter_1_action,self.check_score(),hunter_2_action 
 
 
 #######################################################################################
@@ -150,12 +170,13 @@ def test():
   penalty = -1
   
   test_game =  Game(playing_field,reward,penalty,dict_action_to_coord,prey_action_prob) 
-  print()
-  print(f"initial position prey: {test_game.prey_position}")  
-  print(f"initial position hunter 1: {test_game.hunter_1_position}")  
-  print(f"initial position hunter 2: {test_game.hunter_2_position}\n")  
-
-  for i in range(0,8): 
+  #print()
+  #print(f"initial position prey: {test_game.prey_position}")  
+  #print(f"initial position hunter 1: {test_game.hunter_1_position}")  
+  #print(f"initial position hunter 2: {test_game.hunter_2_position}\n")  
+  #print(test_game.get_relative_locations())
+  print(type(test_game.get_state().rel_position))
+  """for i in range(0,8): 
     hunter_1_action = 0
     hunter_2_action = 1
     print(test_game.play(hunter_1_action,hunter_2_action))
@@ -164,6 +185,6 @@ def test():
     print(f"position hunter 1: {test_game.hunter_1_position}")  
     print(f"position hunter 2: {test_game.hunter_2_position}") 
     print(f"relative positions hunters: {test_game.get_relative_locations()}")
-
+"""
 if __name__ == "__main__":
     test()

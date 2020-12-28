@@ -11,10 +11,10 @@ NB_MOVES = MOVE_STAY + 1
 
 class Qwpae_Agent(Agent):
     def __init__(self, learning_rate: float, discount_rate: float, temperature: float, initial_state: State,
-                    initial_q_value=0.0, theta=None):
+                    initial_q_value=0.0, theta=0.998849):
         Agent.__init__(self, learning_rate, discount_rate, temperature, initial_state,
                     initial_q_value, theta)
-        self.internal_model = Internal_Model(NB_MOVES)
+        self.internal_model = Internal_Model(NB_MOVES,theta)
 
     def get_q_value_with_random_state(self, state: State,action: int, other_action: int=None) -> float:
         """
@@ -48,7 +48,7 @@ class Qwpae_Agent(Agent):
                          self.get_q_value(action,other_action))
         return sum
 
-    def predict_reward(self, future_state: State, action: int):
+    def predict_reward(self, future_state: State, action: int)->float:
         """
         Predict the reward if we go into future_state by
         doing the specified action.

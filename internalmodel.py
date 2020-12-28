@@ -4,7 +4,7 @@ from agent import State
 class Internal_Model:
     """class to handle the internal model of the other player's actions
     """
-    def __init__(self,nbr_of_actions):
+    def __init__(self,nbr_of_actions:int,initial_theta:float):
         """ intialize the internal model
 
         Args:
@@ -12,9 +12,10 @@ class Internal_Model:
         """
         self.model = {}
         self.nbr_of_actions = nbr_of_actions
-        self.init_value = 1/nbr_of_actions
+        self.init_value = 1/nbr_of_actions # 0.2 for five possible moves
+        self.initial_theta = initial_theta
 
-    def get_actual_theta(self,episode):
+    def get_actual_theta(self,episode:int):
         """calculates the value of theta in function of the episode (see paper page 5 bottom left)
 
         Args:
@@ -23,9 +24,9 @@ class Internal_Model:
         Returns:
             float: the actual value of theta for the specific episode
         """
-        return 0.2* pow(0.998849,episode)
+        return 0.2* pow(self.initial_theta,episode)
 
-    def get_dict_key(self,state,action):
+    def get_dict_key(self,state:State,action:int):
         """creates the correct key to be use in the model dict
 
         Args:
@@ -37,7 +38,7 @@ class Internal_Model:
         """
         return(state.rel_position, state.other_rel_position, action)
 
-    def get_state_action_estimation(self,state,action):
+    def get_state_action_estimation(self,state:State,action:int):
         """gets the estimation from the model given the state and the action of the other player
 
         Args:
@@ -55,7 +56,7 @@ class Internal_Model:
             self.model.update({index:self.init_value})
         return estimation
 
-    def update_state_action_estimation(self,state,actual_action,learning_episode=1):
+    def update_state_action_estimation(self,state:State,actual_action:int,learning_episode=1):
         """ updates the estimation for the given state and action
 
         Args:
@@ -75,7 +76,7 @@ class Internal_Model:
             new_estimation = (1- self.get_actual_theta(learning_episode))*old_estimation + factor
             self.model.update({index:new_estimation})
             
-    def get_action_prob(self,state):
+    def get_action_prob(self,state:State):
         """gets the probabilities as stored in the internal model for all possible actions given sthe state
 
         Args:
@@ -117,7 +118,7 @@ class Internal_Model_Random(Internal_Model):
 def test():
     state = State((-1,2),(2,2))
     state_2 = State((3,3),(2,2))
-    int_model = Internal_Model(5)
+    int_model = Internal_Model(5,0.998849)
     print(int_model.get_action_prob(state))
 
     for i in range(0,4):
@@ -129,7 +130,7 @@ def test():
         int_model.update_state_action_estimation(state,1,learning_episode=1)
         print(int_model.get_action_prob(state))
 
-    int_model2 = Internal_Model_Random(5)
+    int_model2 = Internal_Model_Random(5,0.998849)
     print(int_model2.get_action_prob(state))
     int_model2.update_state_action_estimation(state_2,1,learning_episode=1)
     print(int_model2.get_action_prob(state_2))
