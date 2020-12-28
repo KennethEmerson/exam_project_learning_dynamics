@@ -118,13 +118,22 @@ class Game:
             [numeric value]: score for hunters earned during this episode
         """
         
+        self.hunter_1_position = self.update_position(self.hunter_1_position,hunter_1_action)
+        self.hunter_2_position = self.update_position(self.hunter_2_position,hunter_2_action)
+
+        
         #randomly choose prey action with given probabilities 
         prey_action = np.random.choice(self.prey_action_prob.size, p=self.prey_action_prob)
         
+        prey_old_position = self.prey_position
         #update the absolute position of prey and hunters
         self.prey_position = self.update_position(self.prey_position,prey_action)
-        self.hunter_1_position = self.update_position(self.hunter_1_position,hunter_1_action)
-        self.hunter_2_position = self.update_position(self.hunter_2_position,hunter_2_action)
+        
+        #if prey occupies a location the hunters are on, start again from the old position and select a new action 
+        while(np.array_equal(self.prey_position, self.hunter_1_position) or 
+              np.array_equal(self.prey_position,self.hunter_2_position)):
+            prey_action = np.random.choice(self.prey_action_prob.size, p=self.prey_action_prob)
+            self.prey_position = self.update_position(prey_old_position,prey_action)
         
         return self.get_relative_locations(),self.check_score() 
 
