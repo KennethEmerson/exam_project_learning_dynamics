@@ -68,8 +68,9 @@ def evaluation_episode(game:Game, hunter_1:Qwpae_Agent,hunter_2:Qwpae_Agent,epis
     counter = 0
     while(score != game.reward):
         hunter_1_action,score,hunter_2_action = game.play(hunter_1.choose_next_action(),hunter_2.choose_next_action())
-        hunter_1.update(game.get_state_hunter_1(),hunter_1_action,score,hunter_2_action,episode)
-        hunter_2.update(game.get_state_hunter_2(),hunter_2_action,score,hunter_1_action,episode)
+
+        hunter_1.set_state(game.get_state_hunter_1())
+        hunter_2.set_state(game.get_state_hunter_2())
         counter += 1
 
     return counter
