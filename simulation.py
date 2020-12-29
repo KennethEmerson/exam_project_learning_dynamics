@@ -34,6 +34,7 @@ class HunterConfig:
         self.hunter_1 = agenttype(alpha, gamma, tau, game.get_state_hunter_1(), initial_q,theta)
         self.hunter_2 = agenttype(alpha, gamma, tau, game.get_state_hunter_2(), initial_q,theta)
         self.average_timesteps = None
+        self.total_training_episodes = 0
 
 
 
@@ -93,7 +94,7 @@ def simulation(game:Game,hunter_config:HunterConfig,train_episodes_batch,eval_ep
     hunter_2 = hunter_config.hunter_2
     
     average_timesteps = np.zeros(total_train_episodes//train_episodes_batch)
-
+    start_time = datetime.now()
     for episode in range(total_train_episodes):
         
         if(episode%10==0): print(f"learning episode {episode}") 
@@ -102,48 +103,30 @@ def simulation(game:Game,hunter_config:HunterConfig,train_episodes_batch,eval_ep
             timesteps = np.zeros(eval_episodes)
             for eval_episode in range(eval_episodes):
                 timesteps[eval_episode] = evaluation_episode(game, hunter_1,hunter_2,episode)
-                print(f"eval episode {eval_episode}: timesteps:{timesteps[eval_episode]}")
+                #print(f"eval episode {eval_episode}: timesteps:{timesteps[eval_episode]}")
             average_timesteps[episode//train_episodes_batch] = np.average(timesteps)
-
+            print(f"average timesteps evaluation: {average_timesteps[episode//train_episodes_batch]}")
         learning_episode(game, hunter_1,hunter_2,episode)
     hunter_config.average_timesteps =  average_timesteps
-
-
-def plot_graph(hunter_config_list,total_training_episodes):
-    """plots the graph of all hunter configurations 
-
-    Args:
-        hunter_config_list (List): List of trained hunter configurations
-        total_training_episodes (int): the total amount of training episodes
-    """
-    sample_points = hunter_config_list[0].average_timesteps.size
-    episodes_x = np.linspace(0,total_training_episodes,num=sample_points)
     
-    fig, ax = plt.subplots()
-    for config in hunter_config_list:
-        ax.plot(episodes_x,config.average_timesteps,label=config.name,linewidth=0.6)
-  
-    ax.set_xlabel('number of learning episodes')
-    ax.set_ylabel('Average timesteps')
-    ax.legend()
-    
+    end_time = datetime.now()
+    print(f"\nduration testrun:{end_time-start_time}")
+
+def save_results(test_case,total_train_episodes):
     now = datetime.now()
-    timestamp = now.strftime('%Y%m%d_%H%M%S')
-    plt.savefig(f'plot_{timestamp}.png')
-    plt.show()
+    timestamp = now.strftime('%d%m%Y_%H%M')
+    filename_results = f"results_{test_case.name}_{timestamp}.csv" 
+    filename_hunter_config = f"hunters_{test_case.name}_{timestamp}.bin" 
+    test_case.total_training_episodes = total_train_episodes
 
-def save_hunter_config_list(filename,hunter_config_list):
-    """saves the trained hunter_config_list as a binary file (pickle)
-
-    Args:
-        filename (string): the filename in which the hunter_config_list needs to be saved
-        hunter_config_list (list): list of hunter configurations
-    """
-    with open(filename, 'wb') as hunter_config_list_file:
-        pickle.dump(hunter_config_list, hunter_config_list_file)
+    np.savetxt(filename_results, test_case.average_timesteps, 
+                header=f"{test_case.name} {total_train_episodes}", delimiter=';',fmt='%u')
+    
+    with open(filename_hunter_config, 'wb') as hunter_config_list_file:
+        pickle.dump(test_case, hunter_config_list_file)
 
 def test():
-    """main test including the simulations and te plot of the graph
+    """main test: does simulation and saves test results in CSV and hunters in bin file
     """
     playing_field = (7,7)
     dict_action_to_coord = {MOVE_TOP:(0,-1), MOVE_RIGHT:(1,0), MOVE_BOTTOM:(0,1), MOVE_LEFT:(-1,0), MOVE_STAY:(0,0)}
@@ -154,23 +137,15 @@ def test():
     game =  Game(playing_field,reward,penalty,dict_action_to_coord,prey_action_prob) 
     
     # add additional configurations to list
-    test_cases = [
-                    HunterConfig("QwPAE",Qwpae_Agent,game,theta=0.998849),
-                    # ... (add extra hunter configurations here)
-                 ]
-
-    train_episodes_batch = 10   #should be 10
-    eval_episodes = 100           #should be 100
-    total_train_episodes = 2000    #should be 2000
-
-    start_time = datetime.now()
-    for test_case in test_cases:
-        simulation(game,test_case,train_episodes_batch,eval_episodes,total_train_episodes)
-    end_time = datetime.now()
-    print(f"\nduration testrun:{end_time-start_time}")
+    test_case = HunterConfig("QwPAE",Qwpae_Agent,game,theta=0.998849)
     
-    plot_graph(test_cases,total_train_episodes)
-    save_hunter_config_list("testfile.bin",test_cases)
+    train_episodes_batch = 10   #should be 10
+    eval_episodes = 10           #should be 100
+    total_train_episodes = 30    #should be 2000
+
+
+    simulation(game,test_case,train_episodes_batch,eval_episodes,total_train_episodes)
+    save_results(test_case,total_train_episodes)
 
 if __name__ == "__main__":
     test()
