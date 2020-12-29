@@ -1,8 +1,10 @@
 import numpy as np
+import pickle
 from datetime import datetime
 import matplotlib.pyplot as plt
 from qwpae_agent import Qwpae_Agent
 from game import Game
+
 
 MOVE_LEFT = 0
 MOVE_RIGHT = 1
@@ -124,37 +126,51 @@ def plot_graph(hunter_config_list,total_training_episodes):
     ax.set_xlabel('number of learning episodes')
     ax.set_ylabel('Average timesteps')
     ax.legend()
+    
+    now = datetime.now()
+    timestamp = now.strftime('%Y%m%d_%H%M%S')
+    plt.savefig(f'plot_{timestamp}.png')
     plt.show()
+
+def save_hunter_config_list(filename,hunter_config_list):
+    """saves the trained hunter_config_list as a binary file (pickle)
+
+    Args:
+        filename (string): the filename in which the hunter_config_list needs to be saved
+        hunter_config_list (list): list of hunter configurations
+    """
+    with open(filename, 'wb') as hunter_config_list_file:
+        pickle.dump(hunter_config_list, hunter_config_list_file)
 
 def test():
     """main test including the simulations and te plot of the graph
     """
     playing_field = (7,7)
     dict_action_to_coord = {MOVE_TOP:(0,-1), MOVE_RIGHT:(1,0), MOVE_BOTTOM:(0,1), MOVE_LEFT:(-1,0), MOVE_STAY:(0,0)}
-    prey_action_prob = np.array([1/3,1/3,1/3,0,0])
+    prey_action_prob = np.array([0,1/3,1/3,1/3,0])
     reward = 1
     penalty = -1
     
     game =  Game(playing_field,reward,penalty,dict_action_to_coord,prey_action_prob) 
-    start_time = datetime.now()
-
-
+    
     # add additional configurations to list
     test_cases = [
                     HunterConfig("QwPAE",Qwpae_Agent,game,theta=0.998849),
                     # ... (add extra hunter configurations here)
                  ]
 
-    train_episodes_batch = 2
-    eval_episodes = 1
-    total_train_episodes = 20
+    train_episodes_batch = 10   #should be 10
+    eval_episodes = 100           #should be 100
+    total_train_episodes = 2000    #should be 2000
 
+    start_time = datetime.now()
     for test_case in test_cases:
         simulation(game,test_case,train_episodes_batch,eval_episodes,total_train_episodes)
-    
     end_time = datetime.now()
     print(f"\nduration testrun:{end_time-start_time}")
+    
     plot_graph(test_cases,total_train_episodes)
+    save_hunter_config_list("testfile.bin",test_cases)
 
 if __name__ == "__main__":
     test()
