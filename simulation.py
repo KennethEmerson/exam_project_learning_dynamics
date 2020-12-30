@@ -17,7 +17,7 @@ NB_MOVES = MOVE_STAY + 1
 class HunterConfig:
     """contains the configuration of two agents playing the game
     """
-    def __init__(self,name,agenttype,game,alpha = 0.1, gamma = 0.5, tau = 0.998849, initial_q = 0.0,theta=None):
+    def __init__(self,name,agenttype,game,alpha = 0.3, gamma = 0.9, tau = 0.998849, initial_q = 0.0,theta=None):
         """initialize the hunter configuration
 
         Args:

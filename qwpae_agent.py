@@ -72,7 +72,7 @@ class Qwpae_Agent(Agent):
         :param other_action: The other agent action
         :param episode: the episode of the game
         """
-
+        self.temperature = self.internal_model.get_actual_theta(episode) # in paper theta and tau are equal 
         self.internal_model.update_state_action_estimation(self.state, other_action, episode)
         super().update(new_state,action,reward,other_action)
 
