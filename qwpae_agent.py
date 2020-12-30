@@ -59,10 +59,21 @@ class Qwpae_Agent(Agent):
 
         :return: The predicted reward.
         """
-        action_other_optimal = np.argmax(self.internal_model.get_action_prob(future_state))
-        return self.get_q_value_with_random_state(future_state,action,action_other_optimal)
+        moves_probability = self.internal_model.get_action_prob(future_state)
+        max_probability = max(moves_probability)
+        max_q = None
 
-    def update(self, new_state: State, action: int, reward: float, other_action: int,episode=1) -> None:
+        for other_action in range(len(moves_probability)):
+            if moves_probability[other_action] == max_probability:
+                q = self.get_q_value_with_random_state(future_state, action, other_action)
+                if max_q is None or q > max_q:
+                    max_q = q
+
+        # action_other_optimal = np.argmax(self.internal_model.get_action_prob(future_state))
+        # return self.get_q_value_with_random_state(future_state,action,action_other_optimal)
+        return max_q
+
+    def update(self, new_state: State, action: int, reward: float, other_action: int,episode=1):
         """
         Update the agent.
 

@@ -74,7 +74,21 @@ def evaluation_episode(game:Game, hunter_1:Qwpae_Agent,hunter_2:Qwpae_Agent,epis
 
         hunter_1.set_state(game.get_state_hunter_1())
         hunter_2.set_state(game.get_state_hunter_2())
+
         counter += 1
+
+    #print("Hunter 1\n\n", hunter_1.q_table)
+    #print("Hunter 2\n\n", hunter_2.q_table)
+    """print(max(hunter_1.q_table.values()))
+
+    v = list(hunter_1.q_table.values())
+    #v.sort()
+    s = set(v)
+
+    for val in s:
+        print(val, v.count(val))
+
+    input("...")"""
 
     return counter
 
@@ -97,7 +111,9 @@ def simulation(game:Game,hunter_config:HunterConfig,train_episodes_batch,eval_ep
     start_time = datetime.now()
     for episode in range(total_train_episodes):
         
-        if(episode%10==0): print(f"learning episode {episode}") 
+        if(episode%10==0): print(f"learning episode {episode}")
+
+        #learning_episode(game, hunter_1,hunter_2,episode)
 
         if(episode % train_episodes_batch==0):
             timesteps = np.zeros(eval_episodes)
@@ -132,7 +148,7 @@ def test():
     dict_action_to_coord = {MOVE_TOP:(0,-1), MOVE_RIGHT:(1,0), MOVE_BOTTOM:(0,1), MOVE_LEFT:(-1,0), MOVE_STAY:(0,0)}
     prey_action_prob = np.array([0,1/3,1/3,1/3,0])
     reward = 1
-    penalty = -1
+    penalty = 0#-1
     
     game =  Game(playing_field,reward,penalty,dict_action_to_coord,prey_action_prob) 
     
@@ -140,8 +156,8 @@ def test():
     test_case = HunterConfig("QwPAE",Qwpae_Agent,game,theta=0.998849)
     
     train_episodes_batch = 10   #should be 10
-    eval_episodes = 10           #should be 100
-    total_train_episodes = 30    #should be 2000
+    eval_episodes = 100           #should be 100
+    total_train_episodes = 2000    #should be 2000
 
 
     simulation(game,test_case,train_episodes_batch,eval_episodes,total_train_episodes)

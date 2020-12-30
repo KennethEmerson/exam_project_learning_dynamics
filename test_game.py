@@ -1,6 +1,5 @@
 import unittest
 import numpy as np
-from random import randint
 from game import Game
 
 #########################################################################################

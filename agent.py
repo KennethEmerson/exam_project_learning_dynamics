@@ -130,17 +130,13 @@ class Agent:
         """
         global NB_MOVES
         # @TODO: take into account the prey moves (if it changes something?)
+
         ev_max = None
         for action in range(NB_MOVES):
-            own_position = self.compute_new_position(action, new_state.rel_position)
-            for other_action in range(NB_MOVES):
-                other_position = self.compute_new_position(other_action, new_state.other_rel_position)
+            ev = self.predict_reward(new_state, action)
 
-                state = State(own_position, other_position)
-                ev = self.predict_reward(state, action)
-
-                if ev_max is None or ev > ev_max:
-                    ev_max = ev
+            if ev_max is None or ev > ev_max:
+                ev_max = ev
 
         return ev_max
 
