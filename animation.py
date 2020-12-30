@@ -38,9 +38,9 @@ def game_showcase(game:Game,hunter_config):
         prey_pos = game.prey_position
         
         data = np.zeros([game.x_max,game.y_max])
-        data[prey_pos[0],prey_pos[1]] = 2
-        data[hunter_1_pos[0],hunter_1_pos[1]] = 1
-        data[hunter_2_pos[0],hunter_2_pos[1]] = 1
+        data[prey_pos[1],prey_pos[0]] = 2             #numpy array uses first index for rows (y coord) and second for columns (x coord)
+        data[hunter_1_pos[1],hunter_1_pos[0]] = 1     #numpy array uses first index for rows (y coord) and second for columns (x coord)
+        data[hunter_2_pos[1],hunter_2_pos[0]] = 1     #numpy array uses first index for rows (y coord) and second for columns (x coord)
 
         ax.clear()
         ax.imshow(data)
@@ -68,9 +68,9 @@ if __name__ == "__main__":
 
   playing_field = (7,7)
   dict_action_to_coord = {MOVE_TOP:(0,-1), MOVE_RIGHT:(1,0), MOVE_BOTTOM:(0,1), MOVE_LEFT:(-1,0), MOVE_STAY:(0,0)}
-  prey_action_prob = np.array([1/3,1/3,0,1/3,0])
+  prey_action_prob = np.array([0,1/3,1/3,1/3,0])
   reward = 1
   penalty = -1
     
   game =  Game(playing_field,reward,penalty,dict_action_to_coord,prey_action_prob)  
-  showcase_from_file(game,"testfile.bin",0)
+  showcase_from_file(game,"hunters_QwPAE_30122020_1338.bin")
