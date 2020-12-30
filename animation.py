@@ -49,17 +49,13 @@ def game_showcase(game:Game,hunter_config):
     ani = FuncAnimation(fig, animate, interval=200,blit=True)
     plt.show()  
 
-def save_hunter_config_list(filename,hunter_config_list):
-  with open(filename, 'wb') as hunter_config_list_file:
-    pickle.dump(hunter_config_list, hunter_config_list_file)
+def load_hunter_config(filename):
+  with open(filename, 'rb') as hunter_config_file:
+     return pickle.load(hunter_config_file)
 
-def load_hunter_config_list(filename):
-  with open(filename, 'rb') as hunter_config_list_file:
-     return pickle.load(hunter_config_list_file)
-
-def showcase_from_file(game:Game,filename,hunter_config_list_index:int):
-  hunter_config_list = load_hunter_config_list(filename)
-  game_showcase(game,hunter_config_list[hunter_config_list_index])
+def showcase_from_file(game:Game,filename):
+  hunter_config = load_hunter_config(filename)
+  game_showcase(game,hunter_config)
 
 if __name__ == "__main__":
 
