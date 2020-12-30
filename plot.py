@@ -1,5 +1,6 @@
 import numpy as np
 import pickle
+import math
 import os.path
 from simulation import HunterConfig
 import matplotlib.pyplot as plt
@@ -60,18 +61,25 @@ def plot_graph(file_list):
                             can be CSV files with measurements or a Hunteconfiguration Bin files or mixed
     """
     fig, ax = plt.subplots()
+    max_x_values = np.zeros(len(file_list))
+    max_y_values = np.zeros(len(file_list))
 
-    for filename in file_list:
+    for file_index, filename in enumerate(file_list):
         name, data, total_training_episodes = create_data_for_one_plot(filename)
-        print(name)
+        max_x_values[file_index] = total_training_episodes
+        max_y_values[file_index] = int(math.ceil(np.max(data)/100)) * 100
         sample_points = data.size
         episodes_x = np.linspace(0,total_training_episodes,num=sample_points)
         ax.plot(episodes_x,data,label=name,linewidth=0.6)
   
     ax.set_xlabel('number of learning episodes')
-    ax.set_ylabel('Average timesteps')
+    ax.set_ylabel('Average time steps')
     ax.legend()
     
+    plt.xticks(np.arange(0,2500,500))
+    plt.yticks(np.arange(0,np.max(max_y_values),100))
+    plt.xlim(0,2000)
+    plt.ylim(0,np.max(max_y_values))
     plt.show()
 
 
@@ -80,7 +88,7 @@ if __name__ == "__main__":
     # add filenames in list which you want on plot
     # both CSV results and hunterconfig binary files can be used
     file_list = [
-                 #"hunters_QwPAE_20201230_000944.bin",
+                 "hunters_QwPAE_30122020_1338.bin",
                  #"results_QwPAE_20201230_003849.csv",
                 ]
     plot_graph(file_list)
