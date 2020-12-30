@@ -73,8 +73,9 @@ class Qwpae_Agent(Agent):
         :param episode: the episode of the game
         """
 
+        self.internal_model.update_state_action_estimation(self.state, other_action, episode)
         super().update(new_state,action,reward,other_action)
-        self.internal_model.update_state_action_estimation(new_state,other_action,episode)
+
 
 def test():
     alpha = 0.1
