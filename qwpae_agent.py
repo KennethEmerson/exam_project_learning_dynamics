@@ -1,6 +1,6 @@
 import numpy as np
 from agent import State, Agent
-from internalmodel import Internal_Model
+from internalmodel import Internal_Model, Internal_Model_Random
 
 MOVE_LEFT = 0
 MOVE_RIGHT = 1
@@ -9,7 +9,7 @@ MOVE_BOTTOM = 3
 MOVE_STAY = 4
 NB_MOVES = MOVE_STAY + 1
 
-class Qwpae_Agent(Agent):
+class QwProposedAE_Agent(Agent):
     def __init__(self, learning_rate: float, discount_rate: float, temperature: float, initial_state: State,
                     initial_q_value=0.0, theta=0.998849):
         Agent.__init__(self, learning_rate, discount_rate, temperature, initial_state,
@@ -88,6 +88,14 @@ class Qwpae_Agent(Agent):
         super().update(new_state,action,reward,other_action)
 
 
+class QwRandomAE_agent(QwProposedAE_Agent):
+    def __init__(self, learning_rate: float, discount_rate: float, temperature: float, initial_state: State,
+                    initial_q_value=0.0, theta=0.998849):
+        Agent.__init__(self, learning_rate, discount_rate, temperature, initial_state,
+                    initial_q_value, theta)
+        self.internal_model = Internal_Model_Random(NB_MOVES,theta)
+
+
 def test():
     alpha = 0.1
     gamma = 0.5
@@ -95,7 +103,7 @@ def test():
     state = State((-10, -10), (10, 10))
     initial_q = 0.0
 
-    agent = Qwpae_Agent(alpha, gamma, tau, state, initial_q)
+    agent = QwProposedAE_Agent(alpha, gamma, tau, state, initial_q)
     action = agent.choose_next_action()
     print(action)
     new_pos = agent.compute_new_position(action, (-10, -10))

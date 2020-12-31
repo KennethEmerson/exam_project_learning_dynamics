@@ -2,7 +2,7 @@ import numpy as np
 import pickle
 from datetime import datetime
 import matplotlib.pyplot as plt
-from qwpae_agent import Qwpae_Agent
+from qwpae_agent import QwProposedAE_Agent, QwRandomAE_agent
 from game import Game
 
 
@@ -55,7 +55,7 @@ def learning_episode(game:Game, hunter_1,hunter_2,episode:int):
         hunter_2.update(game.get_state_hunter_2(),hunter_2_action,score,hunter_1_action,episode)
 
 
-def evaluation_episode(game:Game, hunter_1:Qwpae_Agent,hunter_2:Qwpae_Agent,episode:int):
+def evaluation_episode(game:Game, hunter_1,hunter_2,episode:int):
     """playes one evaluation episode where the hunters are not allowed to update
 
     Args:
@@ -153,7 +153,9 @@ def test():
     game =  Game(playing_field,reward,penalty,dict_action_to_coord,prey_action_prob) 
     
     # add additional configurations to list
-    test_case = HunterConfig("QwPAE",Qwpae_Agent,game,theta=0.998849)
+
+    test_case = HunterConfig("QwPAE",QwProposedAE_Agent,game,theta=0.998849) # use this for QwPAE testrun
+    #test_case = HunterConfig("QwRAE",QwRandomAE_agent,game,theta=0.998849)    # use this for QwRAE testrun
     
     train_episodes_batch = 10   #should be 10
     eval_episodes = 100           #should be 100
