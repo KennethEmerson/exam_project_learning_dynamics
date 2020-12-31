@@ -105,34 +105,18 @@ def simulation(game: Game, hunter_config: HunterConfig, train_episodes_batch: in
     hunter_1 = hunter_config.hunter_1
     hunter_2 = hunter_config.hunter_2
 
-<<<<<<< HEAD
-    average_timesteps = np.zeros(total_train_episodes//train_episodes_batch)
-=======
+
     average_time_steps = np.zeros(total_train_episodes // train_episodes_batch)
->>>>>>> origin/main
     start_time = datetime.now()
 
     for episode in range(total_train_episodes):
-<<<<<<< HEAD
-
-        if(episode%10==0): print(f"learning episode {episode}")
-=======
         if episode % 10 == 0:
             print(f"learning episode {episode}")
->>>>>>> origin/main
 
         # Estimate the performances
         if episode % train_episodes_batch == 0:
             time_steps = np.zeros(eval_episodes)
             for eval_episode in range(eval_episodes):
-<<<<<<< HEAD
-                timesteps[eval_episode] = evaluation_episode(game, hunter_1,hunter_2,episode)
-                #print(f"eval episode {eval_episode}: timesteps:{timesteps[eval_episode]}")
-            average_timesteps[episode//train_episodes_batch] = np.average(timesteps)
-            print(f"average timesteps evaluation: {average_timesteps[episode//train_episodes_batch]}")
-        learning_episode(game, hunter_1,hunter_2,episode)
-    hunter_config.average_timesteps =  average_timesteps
-=======
                 time_steps[eval_episode] = do_evaluation_episode(game, (hunter_1, hunter_2))
 
             average_time_steps[episode // train_episodes_batch] = np.average(time_steps)
@@ -142,7 +126,6 @@ def simulation(game: Game, hunter_config: HunterConfig, train_episodes_batch: in
         do_learning_episode(game, (hunter_1, hunter_2), episode)
 
     hunter_config.average_time_steps = average_time_steps
->>>>>>> origin/main
 
     end_time = datetime.now()
     print(f"\nduration testrun:{end_time - start_time}")
@@ -159,15 +142,6 @@ def save_results(hunter_config: HunterConfig, total_train_episodes: int):
     """
     now = datetime.now()
     timestamp = now.strftime('%d%m%Y_%H%M')
-<<<<<<< HEAD
-    filename_results = f"results_{test_case.name}_{timestamp}.csv"
-    filename_hunter_config = f"hunters_{test_case.name}_{timestamp}.bin"
-    test_case.total_training_episodes = total_train_episodes
-
-    np.savetxt(filename_results, test_case.average_timesteps,
-                header=f"{test_case.name} {total_train_episodes}", delimiter=';',fmt='%u')
-
-=======
     filename_results = f"results_{hunter_config.name}_{timestamp}.csv"
     filename_hunter_config = f"hunters_{hunter_config.name}_{timestamp}.bin"
     hunter_config.total_training_episodes = total_train_episodes
@@ -175,7 +149,6 @@ def save_results(hunter_config: HunterConfig, total_train_episodes: int):
     np.savetxt(filename_results, hunter_config.average_time_steps,
                header=f"{hunter_config.name} {total_train_episodes}", delimiter=';', fmt='%u')
 
->>>>>>> origin/main
     with open(filename_hunter_config, 'wb') as hunter_config_list_file:
         pickle.dump(hunter_config, hunter_config_list_file)
 
@@ -190,18 +163,6 @@ def start_simulation(train_episodes_batch=10, eval_episodes=100, total_train_epi
                             MOVE_LEFT: (-1, 0), MOVE_STAY: (0, 0)}
     prey_action_prob = np.array([0, 1 / 3, 1 / 3, 1 / 3, 0])
     reward = 1
-<<<<<<< HEAD
-    penalty = -1
-
-    game =  Game(playing_field,reward,penalty,dict_action_to_coord,prey_action_prob)
-
-    # add additional configurations to list
-    test_case = HunterConfig("QwPAE",Qwpae_Agent,game,theta=0.998849)
-
-    train_episodes_batch = 10   #should be 10
-    eval_episodes = 10           #should be 100
-    total_train_episodes = 30    #should be 2000
-=======
     penalty = 0  # -1
 
     game = Game(playing_field, reward, penalty, dict_action_to_coord, prey_action_prob)
@@ -213,15 +174,10 @@ def start_simulation(train_episodes_batch=10, eval_episodes=100, total_train_epi
 
     # Use this for QwRAE test run
     # config = HunterConfig("QwRAE",QwRandomAEAgent,game,theta=0.998849)
->>>>>>> origin/main
 
     simulation(game, config, train_episodes_batch, eval_episodes, total_train_episodes)
     save_results(config, total_train_episodes)
 
 
 if __name__ == "__main__":
-<<<<<<< HEAD
-    test()
-=======
     start_simulation()
->>>>>>> origin/main
