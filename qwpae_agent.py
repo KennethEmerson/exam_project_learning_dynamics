@@ -42,7 +42,7 @@ class QwProposedAEAgent(Agent):
                          self.get_q_value(action, other_action))
         return sum
 
-    def predict_reward(self, future_state: State, action: int) -> float:
+    def predict_reward2(self, future_state: State, action: int) -> float:
         """
         Predict the reward if we go into future_state by
         doing the specified action.
@@ -65,6 +65,21 @@ class QwProposedAEAgent(Agent):
 
         return max_q
 
+    def predict_reward(self, future_state: State, action: int) -> float:
+        """
+        Predict the reward if we go into future_state by
+        doing the specified action.
+
+        :param future_state: The future state to be in.
+        :param action: The action done to get into that
+            state.
+
+        :return: The predicted reward.
+        """
+        moves_probability = self.internal_model.get_action_prob(future_state)
+        max_probability = max(moves_probability)
+        return moves_probability[moves_probability.index(max_probability)]
+
     def update(self, new_state: State, action: int, reward: float, other_action: int, episode=1):
         """
         Update the agent.
@@ -85,7 +100,7 @@ class QwRandomAEAgent(QwProposedAEAgent):
                  initial_q_value=0.0, theta=0.998849):
         Agent.__init__(self, learning_rate, discount_rate, temperature, initial_state,
                        initial_q_value, theta)
-        self.internal_model = InternalModelRandom(NB_MOVES, theta)
+        self.internal_model = InternalModelRandom(theta)
 
 
 def test():
