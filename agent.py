@@ -1,11 +1,5 @@
 import numpy as np
-
-MOVE_LEFT = 0
-MOVE_RIGHT = 1
-MOVE_TOP = 2
-MOVE_BOTTOM = 3
-MOVE_STAY = 4
-NB_MOVES = MOVE_STAY + 1
+from move import *
 
 
 class State:

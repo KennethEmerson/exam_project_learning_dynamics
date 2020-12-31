@@ -1,22 +1,16 @@
-import numpy as np
 from agent import State, Agent
-from internalmodel import Internal_Model, Internal_Model_Random
+from internalmodel import InternalModel, InternalModelRandom
+from move import *
 
-MOVE_LEFT = 0
-MOVE_RIGHT = 1
-MOVE_TOP = 2
-MOVE_BOTTOM = 3
-MOVE_STAY = 4
-NB_MOVES = MOVE_STAY + 1
 
-class QwProposedAE_Agent(Agent):
+class QwProposedAEAgent(Agent):
     def __init__(self, learning_rate: float, discount_rate: float, temperature: float, initial_state: State,
-                    initial_q_value=0.0, theta=0.998849):
+                 initial_q_value=0.0, theta=0.998849):
         Agent.__init__(self, learning_rate, discount_rate, temperature, initial_state,
-                    initial_q_value, theta)
-        self.internal_model = Internal_Model(NB_MOVES,theta)
+                       initial_q_value, theta)
+        self.internal_model = InternalModel(theta)
 
-    def get_q_value_with_random_state(self, state: State,action: int, other_action: int=None) -> float:
+    def get_q_value_with_random_state(self, state: State, action: int, other_action: int = None) -> float:
         """
         Get the q value based on the current state.
 
@@ -43,12 +37,12 @@ class QwProposedAE_Agent(Agent):
         :return: The expected value.
         """
         sum = 0
-        for other_action in range(0,NB_MOVES):
-            sum = sum + (self.internal_model.get_state_action_estimation(self.state,other_action) *
-                         self.get_q_value(action,other_action))
+        for other_action in range(NB_MOVES):
+            sum = sum + (self.internal_model.get_state_action_estimation(self.state, other_action) *
+                         self.get_q_value(action, other_action))
         return sum
 
-    def predict_reward(self, future_state: State, action: int)->float:
+    def predict_reward(self, future_state: State, action: int) -> float:
         """
         Predict the reward if we go into future_state by
         doing the specified action.
@@ -69,11 +63,9 @@ class QwProposedAE_Agent(Agent):
                 if max_q is None or q > max_q:
                     max_q = q
 
-        # action_other_optimal = np.argmax(self.internal_model.get_action_prob(future_state))
-        # return self.get_q_value_with_random_state(future_state,action,action_other_optimal)
         return max_q
 
-    def update(self, new_state: State, action: int, reward: float, other_action: int,episode=1):
+    def update(self, new_state: State, action: int, reward: float, other_action: int, episode=1):
         """
         Update the agent.
 
@@ -83,17 +75,17 @@ class QwProposedAE_Agent(Agent):
         :param other_action: The other agent action
         :param episode: the episode of the game
         """
-        self.temperature = self.internal_model.get_actual_theta(episode) # in paper theta and tau are equal 
+        self.temperature = self.internal_model.get_actual_theta(episode)  # in paper theta and tau are equal
         self.internal_model.update_state_action_estimation(self.state, other_action, episode)
-        super().update(new_state,action,reward,other_action)
+        super().update(new_state, action, reward, other_action)
 
 
-class QwRandomAE_agent(QwProposedAE_Agent):
+class QwRandomAEAgent(QwProposedAEAgent):
     def __init__(self, learning_rate: float, discount_rate: float, temperature: float, initial_state: State,
-                    initial_q_value=0.0, theta=0.998849):
+                 initial_q_value=0.0, theta=0.998849):
         Agent.__init__(self, learning_rate, discount_rate, temperature, initial_state,
-                    initial_q_value, theta)
-        self.internal_model = Internal_Model_Random(NB_MOVES,theta)
+                       initial_q_value, theta)
+        self.internal_model = InternalModelRandom(NB_MOVES, theta)
 
 
 def test():
@@ -103,7 +95,7 @@ def test():
     state = State((-10, -10), (10, 10))
     initial_q = 0.0
 
-    agent = QwProposedAE_Agent(alpha, gamma, tau, state, initial_q)
+    agent = QwProposedAEAgent(alpha, gamma, tau, state, initial_q)
     action = agent.choose_next_action()
     print(action)
     new_pos = agent.compute_new_position(action, (-10, -10))
@@ -112,5 +104,7 @@ def test():
 
     action = agent.choose_next_action()
     print(action)
+
+
 if __name__ == "__main__":
     test()
