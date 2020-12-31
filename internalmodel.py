@@ -1,139 +1,151 @@
 import numpy as np
 from agent import State
+from move import *
 
-class Internal_Model:
-    """class to handle the internal model of the other player's actions
+
+class InternalModel:
     """
-    def __init__(self,nbr_of_actions:int,initial_theta:float):
-        """ intialize the internal model
+    Class to handle the internal model of the other player's actions.
+    """
 
-        Args:
-            nbr_of_actions (int): the total number of available actions
+    def __init__(self, initial_theta: float):
+        """
+        Initialize the internal model.
+
+        :param initial_theta: The initial theta value.
         """
         self.model = {}
-        self.nbr_of_actions = nbr_of_actions
-        self.init_value = 1/nbr_of_actions # 0.2 for five possible moves
+        self.init_value = 1 / NB_MOVES  # 0.2 for five possible moves
         self.initial_theta = initial_theta
 
-    def get_actual_theta(self,episode:int):
-        """calculates the value of theta in function of the episode (see paper page 5 bottom left)
-
-        Args:
-            episode (int): the learning episode
-
-        Returns:
-            float: the actual value of theta for the specific episode
+    def get_actual_theta(self, episode: int) -> float:
         """
-        return 0.2* pow(self.initial_theta,episode)
+        Calculate the value of theta in function of the
+        episode (see paper page 5, bottom left).
 
-    def get_dict_key(self,state:State,action:int):
-        """creates the correct key to be use in the model dict
+        :param episode: the learning episode
 
-        Args:
-            state (State): the state of the two hunters given by their relative positions
-            action (int): the number of the action used by the opponent
-
-        Returns:
-            tuple: the tuple containing the key components
+        :return: The actual value of theta for the specific episode
         """
-        return(state.rel_position, state.other_rel_position, action)
+        return 0.2 * (self.initial_theta ** episode)
 
-    def get_state_action_estimation(self,state:State,action):
-        """gets the estimation from the model given the state and the action of the other player
-
-        Args:
-            state (State): the state of the two hunters given by their relative positions
-            action (int): the number of the action used by the opponent
-
-        Returns:
-            [type]: [description]
+    def get_dict_key(self, state: State, action: int) -> ((int, int), (int, int), int):
         """
-        index = self.get_dict_key(state,action)
+        Create the correct key to be use in the model dictionary.
+
+        :param state: The state of the two hunters given by their
+             relative positions
+        :param action: The number of the action used by the opponent.
+
+        :return: The tuple containing the key components.
+        """
+        return state.rel_position, state.other_rel_position, action
+
+    def get_state_action_estimation(self, state: State, action: int) -> float:
+        """
+        Get the estimation from the model given the state and the action
+        of the other player.
+
+        :param state: The state of the two hunters given by their relative
+            positions.
+        :param action: The number of the action used by the opponent.
+
+        :return: The action estimation.
+        """
+        index = self.get_dict_key(state, action)
+
         if index in self.model:
-            estimation = self.model.get(self.get_dict_key(state,action))
+            estimation = self.model.get(self.get_dict_key(state, action))
         else:
             estimation = self.init_value
-            self.model.update({index:self.init_value})
+            self.model.update({index: self.init_value})
+
         return estimation
 
-    def update_state_action_estimation(self,state:State,actual_action:int,learning_episode=1):
-        """ updates the estimation for the given state and action
-
-        Args:
-            state (State): the state of the two hunters given by their relative positions
-            actual_action (int): the number of the action used by the opponent
-            learning_episode (int, optional): the number of the learning episode. Defaults to 1.
+    def update_state_action_estimation(self, state: State, actual_action: int, learning_episode=1):
         """
-        for action in range(0,self.nbr_of_actions):
-            index = self.get_dict_key(state,action)
-            old_estimation = self.get_state_action_estimation(state,action)
+        Update the estimation for the given state and action.
 
-            if(action == actual_action):
+        :param state: The state of the two hunters given by their
+            relative positions.
+        :param actual_action: The number of the action used by the
+            opponent.
+        :param learning_episode: The number of the learning episode.
+            Set to 1 by default.
+        """
+        for action in range(NB_MOVES):
+            index = self.get_dict_key(state, action)
+            old_estimation = self.get_state_action_estimation(state, action)
+
+            if action == actual_action:
                 factor = self.get_actual_theta(learning_episode)
             else:
                 factor = 0
 
-            new_estimation = (1- self.get_actual_theta(learning_episode))*old_estimation + factor
-            self.model.update({index:new_estimation})
+            new_estimation = (1 - self.get_actual_theta(learning_episode)) * old_estimation + factor
+            self.model.update({index: new_estimation})
 
-    def get_action_prob(self,state:State):
-        """gets the probabilities as stored in the internal model for all possible actions given sthe state
-
-        Args:
-            state (State): the state of the two hunters given by their relative positions
-
-        Returns:
-            [numpy array]: an array with a probability for every possible action by the other player
+    def get_action_prob(self, state: State) -> [float]:
         """
-        prob = np.zeros(self.nbr_of_actions)
-        for action in range(0,self.nbr_of_actions):
-            prob[action] = self.get_state_action_estimation(state,action)
-        return prob
+        Get the probabilities (as stored in the internal model) for
+        all possible actions in given the state.
+
+        :param state: The state of the two hunters given by their relative
+            positions.
+
+        :return: An array with the probability (based on the internal model),
+            for each action, that the other player chooses that action.
+        """
+
+        return [self.get_state_action_estimation(state, action) for action in range(NB_MOVES)]
 
 
-
-
-class Internal_Model_Random(Internal_Model):
-    """ class with a pseudo internal model. All probabilities will remain set at 0,2
+class InternalModelRandom(InternalModel):
+    """
+    Class with a pseudo internal model. All probabilities will remain
+    set at 0.2.
     """
 
-    def get_state_action_estimation(self,state,action):
-        """[summary]
+    def get_state_action_estimation(self, state, action):
+        """
+        Get the estimation from the model given the state and the action
+        of the other player.
 
-        Args:
-            state (State): the state of the two hunters given by their relative positions
-            action (int): the number of the action used by the opponent
+        :param state: The state of the two hunters given by their relative
+            positions.
+        :param action: The number of the action used by the opponent.
 
-        Returns:
-            [int]: will always return the initial value as a probability
+        :return: The action estimation.
         """
         return self.init_value
 
-    def update_state_action_estimation(self,state,actual_action,learning_episode=1):
-        # this does nothing, all estimations will remain set to initial value
-        dummy = 1
-
+    def update_state_action_estimation(self, state, actual_action, learning_episode=1):
+        """
+        Ignored for this class.
+        """
+        pass
 
 
 def test():
-    state = State((-1,2),(2,2))
-    state_2 = State((3,3),(2,2))
-    int_model = Internal_Model(5,0.998849)
+    state = State((-1, 2), (2, 2))
+    state_2 = State((3, 3), (2, 2))
+    int_model = InternalModel(5, 0.998849)
     print(int_model.get_action_prob(state))
 
-    for i in range(0,4):
-        int_model.update_state_action_estimation(state,0,learning_episode=1)
-        print(int_model.get_state_action_estimation(state,0))
+    for i in range(0, 4):
+        int_model.update_state_action_estimation(state, 0, learning_episode=1)
+        print(int_model.get_state_action_estimation(state, 0))
         print(int_model.get_action_prob(state))
 
-    for i in range(0,4):
-        int_model.update_state_action_estimation(state,1,learning_episode=1)
+    for i in range(0, 4):
+        int_model.update_state_action_estimation(state, 1, learning_episode=1)
         print(int_model.get_action_prob(state))
 
-    int_model2 = Internal_Model_Random(5,0.998849)
+    int_model2 = InternalModelRandom(5, 0.998849)
     print(int_model2.get_action_prob(state))
-    int_model2.update_state_action_estimation(state_2,1,learning_episode=1)
+    int_model2.update_state_action_estimation(state_2, 1, learning_episode=1)
     print(int_model2.get_action_prob(state_2))
+
 
 if __name__ == "__main__":
     test()

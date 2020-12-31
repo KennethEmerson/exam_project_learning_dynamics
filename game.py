@@ -1,161 +1,162 @@
 import numpy as np
 from agent import State
 
+
 class Game:
-    """class to create and interact with the game environment
     """
-    def __init__(self,playing_field_size,reward,penalty,dict_action_to_coord,prey_action_prob):
+    Create a game playable step by step.
+    """
+
+    def __init__(self, playing_field_size, reward, penalty, dict_action_to_coord, prey_action_prob):
         """
         initialize game and place prey and hunters on random positions
 
-        :param playing_field_size (tuple(int,int)): size of game board (x,y)
-        :param reward (numeric value): score returned to hunters when prey is catched after episode
-        :param penalty (numeric value): score returned to hunters when prey is NOT catched after episode
-        :param dict_action_to_coord (dict): maps actions to actual change in
-                                            coordinates. the key is a integer, values are tuples of size 2
-                                            example: {0:(0,-1), 1:(1,0), 2:(0,1), 3:(-1,0), 4:(0,0)}
-        :param prey_action_prob (1-D array-like): probability distribution for each action of the prey.
-                                                  must match the number of keys in dict_action_to_coord
-                                                  example: np.array([1/3,1/3,1/3,0,0])
+        :param playing_field_size: Size of game board (width, height).
+        :param reward: Reward if the prey is caught.
+        :param penalty: Score if the prey is NOT caught.
+        :param dict_action_to_coord: maps actions to actual change in
+            coordinates. the key is a integer, values are tuples of size 2
+            (e.g. {0:(0,-1), 1:(1,0), 2:(0,1), 3:(-1,0), 4:(0,0)})
+
+        :param prey_action_prob: Probability distribution for each action of
+            the prey. Must match the number of keys in dict_action_to_coord
+            (e.g. np.array([1/3,1/3,1/3,0,0])).
         """
         self.x_max = playing_field_size[0]
         self.y_max = playing_field_size[1]
-        self.reward = reward   
+        self.reward = reward
         self.penalty = penalty
         self.dict_action_to_coord = dict_action_to_coord
         self.prey_action_prob = prey_action_prob
 
-        self._reset_positions()
+        self.prey_position, self.hunter_1_position, self.hunter_2_position = None, None, None
 
+        self.reset_positions()
 
-    def _reset_positions(self): 
+    def reset_positions(self):
         """
-        place prey and hunters randomly in the playing field
+        Place the prey and hunters randomly in the playing field.
         """
-        self.prey_position = np.array([np.random.randint(self.x_max),np.random.randint(self.y_max)])
-        self.hunter_1_position = np.array([np.random.randint(self.x_max),np.random.randint(self.y_max)])
-        self.hunter_2_position = np.array([np.random.randint(self.x_max),np.random.randint(self.y_max)])
+        self.prey_position = np.array([np.random.randint(self.x_max), np.random.randint(self.y_max)])
+        self.hunter_1_position = np.array([np.random.randint(self.x_max), np.random.randint(self.y_max)])
+        self.hunter_2_position = np.array([np.random.randint(self.x_max), np.random.randint(self.y_max)])
+        self.move_prey()  # Forbid that the prey start at the same position as the hunters
 
-
-    def update_position(self,position,action):
+    def update_position(self, position: np.array, action: int) -> np.array:
         """ 
-        update the given position considering the action coordinates provided
+        Update the given position considering the action coordinates provided.
 
-        :param position (numpy array): the current x and y position [x,y]
-        :param action (integer): key as used in dict_action_to_coord for the action.
+        :param position: The current x and y position [x,y].
+        :param action: Key corresponding to the action as used in
+            dict_action_to_coord for the action.
 
-        Returns: 
-            [numpy array]: updated position
+        :return: The updated position.
         """
         position = (position + self.dict_action_to_coord.get(action))
-        
-        if(position[0]>(self.x_max-1)): position[0] = position[0] - self.x_max
-        if(position[0]<0):              position[0] = self.x_max - 1
-        if(position[1]>(self.y_max-1)): position[1] = position[1] - self.y_max
-        if(position[1]<0):              position[1] = self.y_max - 1
+
+        position[0] = (self.x_max + position[0]) % self.x_max
+        position[1] = (self.y_max + position[1]) % self.y_max
+
         return position
-    
 
     def get_relative_locations(self):
         """
-        transform the absolute positions to relative positions of the hunters to the prey 
+        Transform the hunters absolute positions to the positions
+        relative to the prey.
 
-        Returns:
-            [numpy array],[numpy array]: relative position of hunter 1 and hunter 2 in context of the prey
+        :return: The relative positions of the hunters.
         """
-        def get_relative_location(prey_coord,hunter_coord,max_coord):
-            dist = np.array([   
-                            (prey_coord - hunter_coord),
-                            (prey_coord  +  max_coord - hunter_coord),
-                            (prey_coord - max_coord -hunter_coord)])
-            min_index = np.argmin(np.abs(dist)) # get index of lowest abs distance
-            return dist[min_index] # return value of index
 
-        rel_loc_hunter_1 =  np.array([
-                            get_relative_location(self.prey_position[0],self.hunter_1_position[0],self.x_max),
-                            get_relative_location(self.prey_position[1],self.hunter_1_position[1],self.y_max)
-                            ])
-        rel_loc_hunter_2 =  np.array([
-                            get_relative_location(self.prey_position[0],self.hunter_2_position[0],self.x_max),
-                            get_relative_location(self.prey_position[1],self.hunter_2_position[1],self.y_max)
-                            ])
-        
-        return rel_loc_hunter_1,rel_loc_hunter_2
-    
+        def get_relative_location(prey_coord, hunter_coord, max_coord):
+            dist = np.array([
+                (prey_coord - hunter_coord),
+                (prey_coord + max_coord - hunter_coord),
+                (prey_coord - max_coord - hunter_coord)])
+            min_index = np.argmin(np.abs(dist))  # get index of lowest abs distance
+            return dist[min_index]  # return value of index
+
+        rel_loc_hunter_1 = np.array([
+            get_relative_location(self.prey_position[0], self.hunter_1_position[0], self.x_max),
+            get_relative_location(self.prey_position[1], self.hunter_1_position[1], self.y_max)
+        ])
+        rel_loc_hunter_2 = np.array([
+            get_relative_location(self.prey_position[0], self.hunter_2_position[0], self.x_max),
+            get_relative_location(self.prey_position[1], self.hunter_2_position[1], self.y_max)
+        ])
+
+        return rel_loc_hunter_1, rel_loc_hunter_2
+
     # ADDED on 28/12 KE
-    def get_state_hunter_1(self):
-        """return a state object with the current relative locations hunter 1
-
-        Returns:
-            [State]: state object with the current relative locations
+    def get_state_hunter_1(self) -> State:
         """
-        rel_loc_hunter_1,rel_loc_hunter_2 = self.get_relative_locations()
-        return State(tuple(rel_loc_hunter_1),tuple(rel_loc_hunter_2))
-    
+        Return a state object with the current relative locations
+        hunter 1.
+
+        :return: The state with the current relative locations.
+        """
+        rel_loc_hunter_1, rel_loc_hunter_2 = self.get_relative_locations()
+        return State(tuple(rel_loc_hunter_1), tuple(rel_loc_hunter_2))
+
     # ADDED on 28/12 KE
-    def get_state_hunter_2(self):
-        """return a state object with the current relative locations for hunter 2 (rel positions are inversed)
-
-        Returns:
-            [State]: state object with the current relative locations
+    def get_state_hunter_2(self) -> State:
         """
-        rel_loc_hunter_1,rel_loc_hunter_2 = self.get_relative_locations()
-        return State(tuple(rel_loc_hunter_2),tuple(rel_loc_hunter_1))
+        Get a state object with the current relative locations for
+        hunter 2 (relative positions are inverted).
 
-    def check_score(self):
+        :return: The state object with the current relative locations.
         """
-        test if prey is captured and determine score for hunters as such
+        rel_loc_hunter_1, rel_loc_hunter_2 = self.get_relative_locations()
+        return State(tuple(rel_loc_hunter_2), tuple(rel_loc_hunter_1))
 
-        Returns:
-            [numeric value]: the score
+    def is_prey_caught(self, x1, y1, x2, y2):
+        return x1 == 0 == x2 and abs(y1) == 1 == abs(y2) and np.sign(y1) != np.sign(y2)
+
+    def compute_score(self) -> float:
+        """
+        Compute the score of the players.
+
+        :return: The score of the players.
         """
         score = self.penalty
         hunter_1_rel_pos, hunter_2_rel_pos = self.get_relative_locations()
-        
-        #check if the prey is captured horizontally
-        if(hunter_1_rel_pos[0] == 0 and hunter_2_rel_pos[0] == 0):
-            if(hunter_1_rel_pos[1] == -1 and hunter_2_rel_pos[1] == 1): score = self.reward
-            if(hunter_1_rel_pos[1] == 1 and hunter_2_rel_pos[1] == -1): score = self.reward
-        
-        #check if the prey is captured vertically
-        if(hunter_1_rel_pos[1] == 0 and hunter_2_rel_pos[1] == 0):
-            if(hunter_1_rel_pos[0] == -1 and hunter_2_rel_pos[0] == 1): score = self.reward
-            if(hunter_1_rel_pos[0] == 1 and hunter_2_rel_pos[0] == -1): score = self.reward 
+
+        x1, y1 = hunter_1_rel_pos
+        x2, y2 = hunter_2_rel_pos
+
+        if self.is_prey_caught(x1, y1, x2, y2) or self.is_prey_caught(y1, x1, y2, x2):
+            score = self.reward
 
         return score
-    
 
-    def play(self,hunter_1_action,hunter_2_action):
-        """
-        play one episode of the game
-
-        :param hunter_1_action (integer): action selected by hunter 1 (key as used in dict_action_to_coord for the action).
-        :param hunter_2_action (integer): action selected by hunter 2 (key as used in dict_action_to_coord for the action).
-        
-        Returns:
-            [numpy array]: relative position of hunter 1 in context of the prey
-            [numpy array]: relative position of hunter 2 in context of the prey
-            [numeric value]: score for hunters earned during this episode
-        """
-        
-        self.hunter_1_position = self.update_position(self.hunter_1_position,hunter_1_action)
-        self.hunter_2_position = self.update_position(self.hunter_2_position,hunter_2_action)
-
-        
-        #randomly choose prey action with given probabilities 
-        prey_action = np.random.choice(self.prey_action_prob.size, p=self.prey_action_prob)
-        
-        prey_old_position = self.prey_position
-        #update the absolute position of prey and hunters
-        self.prey_position = self.update_position(self.prey_position,prey_action)
-        
-        #if prey occupies a location the hunters are on, start again from the old position and select a new action 
-        while(np.array_equal(self.prey_position, self.hunter_1_position) or 
-              np.array_equal(self.prey_position,self.hunter_2_position)):
+    def move_prey(self):
+        bad_position, new_position = True, None
+        while bad_position:
             prey_action = np.random.choice(self.prey_action_prob.size, p=self.prey_action_prob)
-            self.prey_position = self.update_position(prey_old_position,prey_action)
-        
-        return hunter_1_action,self.check_score(),hunter_2_action 
+            new_position = self.update_position(self.prey_position, prey_action)
+
+            bad_position = np.array_equal(new_position, self.hunter_1_position) \
+                           or np.array_equal(new_position, self.hunter_2_position)
+
+        self.prey_position = new_position
+
+    def play_one_episode(self, hunter_1_action: int, hunter_2_action: int) -> float:
+        """
+        Play one episode of the game.
+
+        :param hunter_1_action: Action selected by hunter 1 (key as
+            used in dict_action_to_coord for the action).
+        :param hunter_2_action: action selected by hunter 2 (key as
+            used in dict_action_to_coord for the action).
+
+        :return: The score of the players.
+        """
+
+        self.hunter_1_position = self.update_position(self.hunter_1_position, hunter_1_action)
+        self.hunter_2_position = self.update_position(self.hunter_2_position, hunter_2_action)
+
+        self.move_prey()
+
+        return self.compute_score()
 
 
 #######################################################################################
@@ -163,28 +164,29 @@ class Game:
 #######################################################################################
 
 def test():
-  playing_field = (7,7)
-  dict_action_to_coord = {0:(0,-1), 1:(1,0), 2:(0,1), 3:(-1,0), 4:(0,0)}
-  prey_action_prob = np.array([1/3,1/3,1/3,0,0])
-  reward = 1
-  penalty = -1
-  
-  test_game =  Game(playing_field,reward,penalty,dict_action_to_coord,prey_action_prob) 
-  print()
-  print(f"initial position prey: {test_game.prey_position}")  
-  print(f"initial position hunter 1: {test_game.hunter_1_position}")  
-  print(f"initial position hunter 2: {test_game.hunter_2_position}\n")  
-  print(test_game.get_relative_locations())
-  
-  for i in range(0,8): 
-    hunter_1_action = 0
-    hunter_2_action = 1
-    print(test_game.play(hunter_1_action,hunter_2_action))
+    playing_field = (7, 7)
+    dict_action_to_coord = {0: (0, -1), 1: (1, 0), 2: (0, 1), 3: (-1, 0), 4: (0, 0)}
+    prey_action_prob = np.array([1 / 3, 1 / 3, 1 / 3, 0, 0])
+    reward = 1
+    penalty = -1
 
-    print(f"position prey: {test_game.prey_position}")  
-    print(f"position hunter 1: {test_game.hunter_1_position}")  
-    print(f"position hunter 2: {test_game.hunter_2_position}") 
-    print(f"relative positions hunters: {test_game.get_relative_locations()}")
+    test_game = Game(playing_field, reward, penalty, dict_action_to_coord, prey_action_prob)
+    print()
+    print(f"initial position prey: {test_game.prey_position}")
+    print(f"initial position hunter 1: {test_game.hunter_1_position}")
+    print(f"initial position hunter 2: {test_game.hunter_2_position}\n")
+    print(test_game.get_relative_locations())
+
+    for i in range(0, 8):
+        hunter_1_action = 0
+        hunter_2_action = 1
+        print(test_game.play_one_episode(hunter_1_action, hunter_2_action))
+
+        print(f"position prey: {test_game.prey_position}")
+        print(f"position hunter 1: {test_game.hunter_1_position}")
+        print(f"position hunter 2: {test_game.hunter_2_position}")
+        print(f"relative positions hunters: {test_game.get_relative_locations()}")
+
 
 if __name__ == "__main__":
     test()
