@@ -25,9 +25,9 @@ def game_showcase(game: Game, hunter_config: HunterConfig):
     game.reset_positions()
     reward = game.reward
 
-    def animate():
-        hunter_1_action, score, hunter_2_action = game.play_one_episode(hunter_1.choose_next_action(),
-                                                                        hunter_2.choose_next_action())
+    def animate(_=None):
+        actions = hunter_1.choose_next_action(), hunter_2.choose_next_action()
+        score = game.play_one_episode(actions[0], actions[1])
         if score == reward:
             ani.event_source.stop()
 
@@ -50,6 +50,7 @@ def game_showcase(game: Game, hunter_config: HunterConfig):
         ax.imshow(data)
         return [ax]
 
+    #game.prey_action_prob = np.array([1/4,1/4,1/4,1/4,0])
     ani = FuncAnimation(fig, animate, interval=200, blit=True)
     plt.show()
 
@@ -80,4 +81,4 @@ if __name__ == "__main__":
     penalty = -1
 
     game = Game(playing_field, reward, penalty, dict_action_to_coord, prey_action_prob)
-    showcase_from_file(game, "hunters_QwPAE_30122020_1338.bin")
+    showcase_from_file(game, "hunters_QwPAE_31122020_0340.bin")
