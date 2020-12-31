@@ -19,7 +19,7 @@ class Internal_Model:
         """calculates the value of theta in function of the episode (see paper page 5 bottom left)
 
         Args:
-            episode (int): the learning episode 
+            episode (int): the learning episode
 
         Returns:
             float: the actual value of theta for the specific episode
@@ -32,13 +32,13 @@ class Internal_Model:
         Args:
             state (State): the state of the two hunters given by their relative positions
             action (int): the number of the action used by the opponent
-        
+
         Returns:
             tuple: the tuple containing the key components
         """
         return(state.rel_position, state.other_rel_position, action)
 
-    def get_state_action_estimation(self,state:State,action:int):
+    def get_state_action_estimation(self,state:State,action):
         """gets the estimation from the model given the state and the action of the other player
 
         Args:
@@ -67,15 +67,15 @@ class Internal_Model:
         for action in range(0,self.nbr_of_actions):
             index = self.get_dict_key(state,action)
             old_estimation = self.get_state_action_estimation(state,action)
-            
+
             if(action == actual_action):
                 factor = self.get_actual_theta(learning_episode)
             else:
                 factor = 0
-            
+
             new_estimation = (1- self.get_actual_theta(learning_episode))*old_estimation + factor
             self.model.update({index:new_estimation})
-            
+
     def get_action_prob(self,state:State):
         """gets the probabilities as stored in the internal model for all possible actions given sthe state
 
@@ -96,7 +96,7 @@ class Internal_Model:
 class Internal_Model_Random(Internal_Model):
     """ class with a pseudo internal model. All probabilities will remain set at 0,2
     """
-    
+
     def get_state_action_estimation(self,state,action):
         """[summary]
 
@@ -125,7 +125,7 @@ def test():
         int_model.update_state_action_estimation(state,0,learning_episode=1)
         print(int_model.get_state_action_estimation(state,0))
         print(int_model.get_action_prob(state))
-    
+
     for i in range(0,4):
         int_model.update_state_action_estimation(state,1,learning_episode=1)
         print(int_model.get_action_prob(state))

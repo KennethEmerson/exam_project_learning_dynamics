@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 from qwpae_agent import Qwpae_Agent
 from game import Game
 
+from centralized_Agent import Centralized_Agent
 
 MOVE_LEFT = 0
 MOVE_RIGHT = 1
@@ -36,6 +37,15 @@ class HunterConfig:
         self.average_timesteps = None
         self.total_training_episodes = 0
 
+class Centralized_Config:
+
+    def __init__(self,name,agenttype,game,alpha = 0.3, gamma = 0.9, tau = 0.998849, initial_q = 0.0,theta=None):
+        self.name = name
+        self.hunter_manager = Centralized_Agent(alpha, gamma, tau, game.get_state_hunter_1(), game.get_state_hunter_2(), initial_q,theta)
+        self.hunter_1 = self.hunter_manager.agent_1
+        self.hunter_2 = self.hunter_manager.agent_2
+        self.average_timesteps = None
+        self.total_training_episodes = 0
 
 
 def learning_episode(game:Game, hunter_1,hunter_2,episode:int):
@@ -92,12 +102,12 @@ def simulation(game:Game,hunter_config:HunterConfig,train_episodes_batch,eval_ep
 
     hunter_1 = hunter_config.hunter_1
     hunter_2 = hunter_config.hunter_2
-    
+
     average_timesteps = np.zeros(total_train_episodes//train_episodes_batch)
     start_time = datetime.now()
     for episode in range(total_train_episodes):
-        
-        if(episode%10==0): print(f"learning episode {episode}") 
+
+        if(episode%10==0): print(f"learning episode {episode}")
 
         if(episode % train_episodes_batch==0):
             timesteps = np.zeros(eval_episodes)
@@ -108,20 +118,20 @@ def simulation(game:Game,hunter_config:HunterConfig,train_episodes_batch,eval_ep
             print(f"average timesteps evaluation: {average_timesteps[episode//train_episodes_batch]}")
         learning_episode(game, hunter_1,hunter_2,episode)
     hunter_config.average_timesteps =  average_timesteps
-    
+
     end_time = datetime.now()
     print(f"\nduration testrun:{end_time-start_time}")
 
 def save_results(test_case,total_train_episodes):
     now = datetime.now()
     timestamp = now.strftime('%d%m%Y_%H%M')
-    filename_results = f"results_{test_case.name}_{timestamp}.csv" 
-    filename_hunter_config = f"hunters_{test_case.name}_{timestamp}.bin" 
+    filename_results = f"results_{test_case.name}_{timestamp}.csv"
+    filename_hunter_config = f"hunters_{test_case.name}_{timestamp}.bin"
     test_case.total_training_episodes = total_train_episodes
 
-    np.savetxt(filename_results, test_case.average_timesteps, 
+    np.savetxt(filename_results, test_case.average_timesteps,
                 header=f"{test_case.name} {total_train_episodes}", delimiter=';',fmt='%u')
-    
+
     with open(filename_hunter_config, 'wb') as hunter_config_list_file:
         pickle.dump(test_case, hunter_config_list_file)
 
@@ -133,12 +143,12 @@ def test():
     prey_action_prob = np.array([0,1/3,1/3,1/3,0])
     reward = 1
     penalty = -1
-    
-    game =  Game(playing_field,reward,penalty,dict_action_to_coord,prey_action_prob) 
-    
+
+    game =  Game(playing_field,reward,penalty,dict_action_to_coord,prey_action_prob)
+
     # add additional configurations to list
     test_case = HunterConfig("QwPAE",Qwpae_Agent,game,theta=0.998849)
-    
+
     train_episodes_batch = 10   #should be 10
     eval_episodes = 10           #should be 100
     total_train_episodes = 30    #should be 2000
