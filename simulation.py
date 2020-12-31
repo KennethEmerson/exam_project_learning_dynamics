@@ -163,7 +163,7 @@ def start_simulation(train_episodes_batch=10, eval_episodes=100, total_train_epi
     config = HunterConfig("QwPAE", QwProposedAEAgent, game, theta=0.998849)
 
     # Use this for QwRAE test run
-    # config = HunterConfig("QwRAE",QwRandomAEAgent,game,theta=0.998849)
+    #config = HunterConfig("QwRAE",QwRandomAEAgent,game,theta=0.998849)
 
     simulation(game, config, train_episodes_batch, eval_episodes, total_train_episodes)
     save_results(config, total_train_episodes)
