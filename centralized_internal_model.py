@@ -6,7 +6,7 @@ class Actions:
         self.action_1 = action_1
         self.action_2 = action_2
 
-class Centralized_Internal_Model(Internal_Model): #diff is action is tpl, Q_bar = Q
+class Centralized_Internal_Model(InternalModel): #diff is action is tpl, Q_bar = Q
 
         # def __init__() : same as super
 

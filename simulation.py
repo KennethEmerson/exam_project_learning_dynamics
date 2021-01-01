@@ -2,6 +2,7 @@ import numpy as np
 import pickle
 from datetime import datetime
 from qwpae_agent import QwProposedAEAgent, QwRandomAEAgent
+from centralized_agent import Centralized_Agent, Sub_Agent
 from game import Game
 from move import *
 
@@ -31,11 +32,11 @@ class HunterConfig:
 
 class Centralized_Config:
 
-    def __init__(self,name,agenttype,game,alpha = 0.3, gamma = 0.9, tau = 0.998849, initial_q = 0.0,theta=None):
+    def __init__(self, name, game, alpha = 0.3, gamma = 0.9, tau = 0.998849, initial_q = 0.0, theta=None):
         self.name = name
-        self.hunter_manager = Centralized_Agent(alpha, gamma, tau, game.get_state_hunter_1(), game.get_state_hunter_2(), initial_q,theta)
-        self.hunter_1 = self.hunter_manager.agent_1
-        self.hunter_2 = self.hunter_manager.agent_2
+        hunter_manager = Centralized_Agent(alpha, gamma, tau, game.get_state_hunter_1(), initial_q,theta)
+        self.hunter_1 = Sub_Agent(0, hunter_manager)
+        self.hunter_2 = Sub_Agent(1, hunter_manager)
         self.average_timesteps = None
         self.total_training_episodes = 0
 
@@ -161,7 +162,7 @@ def start_simulation(train_episodes_batch=10, eval_episodes=100, total_train_epi
     and hunters in bin file.
     """
     playing_field = (7, 7)
-    
+
     reward = 1
     penalty = 0  # -1
 
@@ -179,5 +180,17 @@ def start_simulation(train_episodes_batch=10, eval_episodes=100, total_train_epi
     save_results(config, total_train_episodes)
 
 
+def test_centralized_learner(train_episodes_batch=10, eval_episodes=100, total_train_episodes=2000):
+    playing_field = (7, 7)
+    reward = 1
+    penalty = 0  # -1
+
+    game = Game(playing_field, reward, penalty)
+    config = Centralized_Config("Centralized", game, theta=0.998849)
+
+    simulation(game, config, train_episodes_batch, eval_episodes, total_train_episodes)
+    save_results(config, total_train_episodes)
+
 if __name__ == "__main__":
-    start_simulation()
+    # start_simulation()
+    test_centralized_learner(1,1,10)
