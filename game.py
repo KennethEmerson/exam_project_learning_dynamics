@@ -1,13 +1,18 @@
 import numpy as np
 from agent import State
-
+from move import *
 
 class Game:
     """
     Create a game playable step by step.
     """
+    
 
-    def __init__(self, playing_field_size, reward, penalty, dict_action_to_coord, prey_action_prob):
+    def __init__(self, playing_field_size:tuple, 
+                 reward_hunter_1:int,
+                 penalty_hunter_1:int,
+                 reward_hunter_2=None,
+                 penalty_hunter_2=None):
         """
         initialize game and place prey and hunters on random positions
 
@@ -22,15 +27,23 @@ class Game:
             the prey. Must match the number of keys in dict_action_to_coord
             (e.g. np.array([1/3,1/3,1/3,0,0])).
         """
+        
+        dict_action_to_coord = {MOVE_TOP: (0, -1), MOVE_RIGHT: (1, 0), MOVE_BOTTOM: (0, 1),
+                            MOVE_LEFT: (-1, 0), MOVE_STAY: (0, 0)}
+
+        prey_action_prob = np.array([0, 1 / 3, 1 / 3, 1 / 3, 0])
+        
         self.x_max = playing_field_size[0]
         self.y_max = playing_field_size[1]
-        self.reward = reward
-        self.penalty = penalty
+        self.reward_hunter_1 = reward_hunter_1
+        self.penalty_hunter_1 = penalty_hunter_1
+        if reward_hunter_2 == None: self.reward_hunter_2 = reward_hunter_1 
+        else: self.reward_hunter_2 = reward_hunter_1
+        if penalty_hunter_2 == None: self.penalty_hunter_2 = penalty_hunter_1
+        else: self.penalty_hunter_2 = penalty_hunter_1
         self.dict_action_to_coord = dict_action_to_coord
         self.prey_action_prob = prey_action_prob
-
         self.prey_position, self.hunter_1_position, self.hunter_2_position = None, None, None
-
         self.reset_positions()
 
     def reset_positions(self):
@@ -117,16 +130,19 @@ class Game:
 
         :return: The score of the players.
         """
-        score = self.penalty
+        score_hunter_1 = self.penalty_hunter_1
+        score_hunter_2 = self.penalty_hunter_2
+
         hunter_1_rel_pos, hunter_2_rel_pos = self.get_relative_locations()
 
         x1, y1 = hunter_1_rel_pos
         x2, y2 = hunter_2_rel_pos
 
         if self.is_prey_caught(x1, y1, x2, y2) or self.is_prey_caught(y1, x1, y2, x2):
-            score = self.reward
+            score_hunter_1 = self.reward_hunter_1
+            score_hunter_2 = self.reward_hunter_2
 
-        return score
+        return score_hunter_1,score_hunter_2
 
     def move_prey(self):
         bad_position, new_position = True, None
