@@ -2,6 +2,55 @@ import numpy as np
 from agent import State
 from move import *
 
+def is_prey_caught_homogeneous(x1:int, y1:int, x2:int, y2:int) -> (bool,bool):
+    """
+    check if prey is caught using the homogeneous definition in the paper.
+    both hunters should be at each side of the prey, vertically or horizontally.
+    Thus both players get reward
+    function needs to be injected as a parameter in game class 
+
+    :param x1 (int): relative x position of hunter 1 vs prey
+    :param y1 (int): relative y position of hunter 1 vs prey
+    :param x2 (int): relative x position of hunter 2 vs prey
+    :param y2 (int): relative y position of hunter 2 vs prey
+    
+    :Return (Bool,Bool): (has hunter 1 caught the prey,has hunter 2 caught the prey)
+    """
+    is_caught_hunter_1 = (x1 == 0 == x2 and abs(y1) == 1 == abs(y2) and np.sign(y1) != np.sign(y2)) or \
+    (y1 == 0 == y2 and abs(x1) == 1 == abs(x2) and np.sign(x1) != np.sign(x2))
+    
+    is_caught_hunter_2 = is_caught_hunter_1
+    
+    return is_caught_hunter_1, is_caught_hunter_2
+
+def is_prey_caught_heterogeneous(x1:int, y1:int, x2:int, y2:int) -> (bool,bool):
+    """
+    check if prey is caught using the heterogeneous definition in the paper.
+    both hunters should be at each side of the prey, vertically or horizontally.
+    Then hunter 1 gets reward. Hunter 2 only gets a reward if the prey is caught and
+    hunter 2 is at the left or bottom of the prey
+    function needs to be injected as a parameter in game class 
+
+    :param x1 (int): relative x position of hunter 1 vs prey
+    :param y1 (int): relative y position of hunter 1 vs prey
+    :param x2 (int): relative x position of hunter 2 vs prey
+    :param y2 (int): relative y position of hunter 2 vs prey
+
+    :Return (Bool,Bool): (has hunter 1 caught the prey,has hunter 2 caught the prey)
+    """
+    is_caught_hunter_1 = (x1 == 0 == x2 and abs(y1) == 1 == abs(y2) and np.sign(y1) != np.sign(y2)) or \
+                            (y1 == 0 == y2 and abs(x1) == 1 == abs(x2) and np.sign(x1) != np.sign(x2))
+    
+    # hunter 2 must be on the left or the bottom (see paper page 6)
+    # when prey is catched hunter 1 always gets reward, hunter 2 only gets reward
+    # when it is on the left or bottom.
+    # x1 and x2 are relative positions, if x2 == 1 then x2 is ont the left
+    # same for y only coordinates here go downward
+    is_caught_hunter_2 = is_caught_hunter_1 and (x2 == 1 or y2 == -1)
+
+    return is_caught_hunter_1, is_caught_hunter_2
+
+
 class Game:
     """
     Create a game playable step by step.
@@ -12,20 +61,17 @@ class Game:
                  reward_hunter_1:int,
                  penalty_hunter_1:int,
                  reward_hunter_2=None,
-                 penalty_hunter_2=None):
+                 penalty_hunter_2=None,
+                 is_prey_caught_function=is_prey_caught_homogeneous):
         """
         initialize game and place prey and hunters on random positions
 
         :param playing_field_size: Size of game board (width, height).
-        :param reward: Reward if the prey is caught.
-        :param penalty: Score if the prey is NOT caught.
-        :param dict_action_to_coord: maps actions to actual change in
-            coordinates. the key is a integer, values are tuples of size 2
-            (e.g. {0:(0,-1), 1:(1,0), 2:(0,1), 3:(-1,0), 4:(0,0)})
-
-        :param prey_action_prob: Probability distribution for each action of
-            the prey. Must match the number of keys in dict_action_to_coord
-            (e.g. np.array([1/3,1/3,1/3,0,0])).
+        :param reward_hunter_1: Reward for hunter 1 if the prey is caught.
+        :param penalty_hunter_1: Score for hunter 1 if the prey is NOT caught.
+        :param reward_hunter_2: Reward for hunter 2 if the prey is caught.
+        :param penalty_hunter_2: Score for hunter 2 if the prey is NOT caught.
+        :param is_prey_caught_function: function to define if the prey is caught (int,int,int,int) -> (bool,bool)
         """
         
         dict_action_to_coord = {MOVE_TOP: (0, -1), MOVE_RIGHT: (1, 0), MOVE_BOTTOM: (0, 1),
@@ -33,16 +79,23 @@ class Game:
 
         prey_action_prob = np.array([0, 1 / 3, 1 / 3, 1 / 3, 0])
         
-        self.x_max = playing_field_size[0]
-        self.y_max = playing_field_size[1]
-        self.reward_hunter_1 = reward_hunter_1
-        self.penalty_hunter_1 = penalty_hunter_1
-        if reward_hunter_2 == None: self.reward_hunter_2 = reward_hunter_1 
-        else: self.reward_hunter_2 = reward_hunter_1
-        if penalty_hunter_2 == None: self.penalty_hunter_2 = penalty_hunter_1
-        else: self.penalty_hunter_2 = penalty_hunter_1
         self.dict_action_to_coord = dict_action_to_coord
         self.prey_action_prob = prey_action_prob
+
+        self.x_max = playing_field_size[0]
+        self.y_max = playing_field_size[1]
+        
+        self.reward_hunter_1 = reward_hunter_1
+        self.penalty_hunter_1 = penalty_hunter_1
+        
+        if reward_hunter_2 == None: self.reward_hunter_2 = reward_hunter_1 
+        else: self.reward_hunter_2 = reward_hunter_2
+        
+        if penalty_hunter_2 == None: self.penalty_hunter_2 = penalty_hunter_1
+        else: self.penalty_hunter_2 = penalty_hunter_2
+        
+        self.is_prey_caught = is_prey_caught_function
+        
         self.prey_position, self.hunter_1_position, self.hunter_2_position = None, None, None
         self.reset_positions()
 
@@ -121,9 +174,6 @@ class Game:
         rel_loc_hunter_1, rel_loc_hunter_2 = self.get_relative_locations()
         return State(tuple(rel_loc_hunter_2), tuple(rel_loc_hunter_1))
 
-    def is_prey_caught(self, x1, y1, x2, y2):
-        return x1 == 0 == x2 and abs(y1) == 1 == abs(y2) and np.sign(y1) != np.sign(y2)
-
     def compute_score(self) -> float:
         """
         Compute the score of the players.
@@ -138,9 +188,10 @@ class Game:
         x1, y1 = hunter_1_rel_pos
         x2, y2 = hunter_2_rel_pos
 
-        if self.is_prey_caught(x1, y1, x2, y2) or self.is_prey_caught(y1, x1, y2, x2):
-            score_hunter_1 = self.reward_hunter_1
-            score_hunter_2 = self.reward_hunter_2
+        is_caught_hunter_1, is_caught_hunter_2 = self.is_prey_caught(x1,y1,x2,y2)
+
+        if is_caught_hunter_1: score_hunter_1 = self.reward_hunter_1
+        if is_caught_hunter_2: score_hunter_2 = self.reward_hunter_2
 
         return score_hunter_1,score_hunter_2
 
@@ -180,29 +231,67 @@ class Game:
 #######################################################################################
 
 def test():
-    playing_field = (7, 7)
-    dict_action_to_coord = {0: (0, -1), 1: (1, 0), 2: (0, 1), 3: (-1, 0), 4: (0, 0)}
-    prey_action_prob = np.array([1 / 3, 1 / 3, 1 / 3, 0, 0])
-    reward = 1
-    penalty = -1
+    
+    #standard homogeneous game identical rewards
+    game = Game((7,7),1,0)
+    game.hunter_1_position = np.array([0,0])
+    game.hunter_2_position = np.array([4,4])
+    game.prey_position = np.array([2,2])
+    print(f"should be (0,0):{game.compute_score()}") 
+    
+    game.hunter_1_position = np.array([0,0])
+    game.hunter_2_position = np.array([0,2])
+    game.prey_position = np.array([0,1])
+    print(f"should be (1,1):{game.compute_score()}") 
 
-    test_game = Game(playing_field, reward, penalty, dict_action_to_coord, prey_action_prob)
-    print()
-    print(f"initial position prey: {test_game.prey_position}")
-    print(f"initial position hunter 1: {test_game.hunter_1_position}")
-    print(f"initial position hunter 2: {test_game.hunter_2_position}\n")
-    print(test_game.get_relative_locations())
+    game.hunter_1_position = np.array([0,0])
+    game.hunter_2_position = np.array([2,0])
+    game.prey_position = np.array([1,0])
+    print(f"should be (1,1):{game.compute_score()}") 
 
-    for i in range(0, 8):
-        hunter_1_action = 0
-        hunter_2_action = 1
-        print(test_game.play_one_episode(hunter_1_action, hunter_2_action))
+    #standard homogeneous game different rewards
+    game = Game((7,7),1,0,2,-2)
+    game.hunter_1_position = np.array([0,0])
+    game.hunter_2_position = np.array([4,4])
+    game.prey_position = np.array([2,2])
+    print(f"should be (0,-2):{game.compute_score()}") 
+    
+    game.hunter_1_position = np.array([0,0])
+    game.hunter_2_position = np.array([0,2])
+    game.prey_position = np.array([0,1])
+    print(f"should be (1,2):{game.compute_score()}") 
 
-        print(f"position prey: {test_game.prey_position}")
-        print(f"position hunter 1: {test_game.hunter_1_position}")
-        print(f"position hunter 2: {test_game.hunter_2_position}")
-        print(f"relative positions hunters: {test_game.get_relative_locations()}")
+    game.hunter_1_position = np.array([0,0])
+    game.hunter_2_position = np.array([2,0])
+    game.prey_position = np.array([1,0])
+    print(f"should be (1,2):{game.compute_score()}") 
 
+    # heterogeneous game identical rewards
+    game = Game((7,7),1,0,is_prey_caught_function=is_prey_caught_heterogeneous)
+    game.hunter_1_position = np.array([0,0])
+    game.hunter_2_position = np.array([4,4])
+    game.prey_position = np.array([2,2])
+    print(f"should be (0,0):{game.compute_score()}")  
+    
+    game.hunter_1_position = np.array([0,0])
+    game.hunter_2_position = np.array([2,0])
+    game.prey_position = np.array([1,0])
+    print(f"should be (1,0):{game.compute_score()}")
+
+    game.hunter_1_position = np.array([2,0])
+    game.hunter_2_position = np.array([0,0])
+    game.prey_position = np.array([1,0])
+    print(f"should be (1,1):{game.compute_score()}")
+
+    game.hunter_1_position = np.array([0,0])
+    game.hunter_2_position = np.array([0,2])
+    game.prey_position = np.array([0,1])
+    print(f"should be (1,1):{game.compute_score()}")  
+
+    game.hunter_1_position = np.array([0,2])
+    game.hunter_2_position = np.array([0,0])
+    game.prey_position = np.array([0,1])
+    print(f"should be (1,0):{game.compute_score()}")  
 
 if __name__ == "__main__":
     test()
