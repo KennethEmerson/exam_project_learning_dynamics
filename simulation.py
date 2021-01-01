@@ -49,16 +49,17 @@ def do_learning_episode(game: Game, hunters, episode: int):
     :param episode: The current episode of the game.
     """
 
-    score = game.penalty
+    score_hunter_1 = game.penalty_hunter_1
+    score_hunter_2 = game.penalty_hunter_2
     game.reset_positions()
 
-    while score != game.reward:
+    while score_hunter_1 != game.reward_hunter_1 and score_hunter_2 != game.reward_hunter_2:
         actions = hunters[0].choose_next_action(), hunters[1].choose_next_action()
 
-        score = game.play_one_episode(actions[0], actions[1])
+        score_hunter_1,score_hunter_2 = game.play_one_episode(actions[0], actions[1])
 
-        hunters[0].update(game.get_state_hunter_1(), actions[0], score, actions[1], episode)
-        hunters[1].update(game.get_state_hunter_2(), actions[1], score, actions[0], episode)
+        hunters[0].update(game.get_state_hunter_1(), actions[0], score_hunter_1, actions[1], episode)
+        hunters[1].update(game.get_state_hunter_2(), actions[1], score_hunter_2, actions[0], episode)
 
 
 def do_evaluation_episode(game: Game, hunters: tuple) -> int:
@@ -71,13 +72,14 @@ def do_evaluation_episode(game: Game, hunters: tuple) -> int:
     :return: The number of time steps before hunting successfully
         the prey.
     """
-    score = game.penalty
+    score_hunter_1 = game.penalty_hunter_1
+    score_hunter_2 = game.penalty_hunter_2
     game.reset_positions()
 
     counter = 0
-    while score != game.reward:
+    while score_hunter_1 != game.reward_hunter_1 and score_hunter_2 != game.reward_hunter_2:
         actions = hunters[0].choose_next_action(), hunters[1].choose_next_action()
-        score = game.play_one_episode(actions[0], actions[1])
+        score_hunter_1,score_hunter_2 = game.play_one_episode(actions[0], actions[1])
 
         hunters[0].set_state(game.get_state_hunter_1())
         hunters[1].set_state(game.get_state_hunter_2())
@@ -159,13 +161,11 @@ def start_simulation(train_episodes_batch=10, eval_episodes=100, total_train_epi
     and hunters in bin file.
     """
     playing_field = (7, 7)
-    dict_action_to_coord = {MOVE_TOP: (0, -1), MOVE_RIGHT: (1, 0), MOVE_BOTTOM: (0, 1),
-                            MOVE_LEFT: (-1, 0), MOVE_STAY: (0, 0)}
-    prey_action_prob = np.array([0, 1 / 3, 1 / 3, 1 / 3, 0])
+    
     reward = 1
     penalty = 0  # -1
 
-    game = Game(playing_field, reward, penalty, dict_action_to_coord, prey_action_prob)
+    game = Game(playing_field, reward, penalty)
 
     # Add additional configurations to list
 
@@ -173,7 +173,7 @@ def start_simulation(train_episodes_batch=10, eval_episodes=100, total_train_epi
     config = HunterConfig("QwPAE", QwProposedAEAgent, game, theta=0.998849)
 
     # Use this for QwRAE test run
-    #config = HunterConfig("QwRAE",QwRandomAEAgent,game,theta=0.998849)
+    # config = HunterConfig("QwRAE",QwRandomAEAgent,game,theta=0.998849)
 
     simulation(game, config, train_episodes_batch, eval_episodes, total_train_episodes)
     save_results(config, total_train_episodes)
