@@ -68,7 +68,7 @@ def create_data_for_one_plot(filename: str) -> (str, np.array, int):
     return name, average_data, std_data, max_data, min_data, mae_data, total_training_episodes
 
 
-def plot_graph(file_list: [str]):
+def plot_graph(file_list: [str], is_std_included=True):
     """[summary]
     Plot the graphs in the file list.
 
@@ -77,7 +77,10 @@ def plot_graph(file_list: [str]):
         bin files or a mix of both.
     """
     color_list=['b','g','r','c','m']
-    fig, ax = plt.subplots()
+    if is_std_included:
+        fig, (ax, ax_std) = plt.subplots(2, 1, figsize=(6, 5 + 2), gridspec_kw={'height_ratios': [5, 2]})
+    else:
+        fig, ax = plt.subplots()
     max_x_values = np.zeros(len(file_list))
     max_y_values = np.zeros(len(file_list))
 
@@ -88,19 +91,25 @@ def plot_graph(file_list: [str]):
         sample_points = average_data.size
         episodes_x = np.linspace(0, total_training_episodes, num=sample_points)
         ax.plot(episodes_x, average_data, label=name, linewidth=0.6,color=color_list[file_index])
-        if std_data is not None:
-            ax.fill_between(episodes_x, average_data+std_data, average_data-std_data, color=color_list[file_index], alpha=0.4)
+        if std_data is not None and is_std_included:
+            ax_std.plot(episodes_x, std_data, label=name, linewidth=0.6, color=color_list[file_index])
+            ax_std.set_xlabel('number of learning episodes')
+            ax_std.set_ylabel('standard deviation')
+            # ax.fill_between(episodes_x, average_data+std_data, average_data-std_data, color=color_list[file_index], alpha=0.4)
             #ax.plot(episodes_x, max_data,linestyle=':', linewidth=0.6,color=color_list[file_index])
             #ax.plot(episodes_x, min_data,linestyle=':', linewidth=0.6,color=color_list[file_index])
             #ax.fill_between(episodes_x, max_data, min_data, color=color_list[file_index], alpha=0.3)
-    ax.set_xlabel('number of learning episodes')
+    if not is_std_included:
+        ax.set_xlabel('number of learning episodes')
     ax.set_ylabel('Average time steps')
     ax.legend()
 
-    plt.xticks(np.arange(0, 2500, 500))
-    plt.yticks(np.arange(0, np.max(max_y_values), 100))
-    plt.xlim(0, 2000)
-    plt.ylim(0, np.max(max_y_values))
+    ax.set_xticks(np.arange(0, 2500, 500))
+    ax.set_yticks(np.arange(0, np.max(max_y_values), 100))
+    ax.set_xlim(0, 2000)
+    ax.set_ylim(0, np.max(max_y_values))
+    ax.set_xticks(np.arange(0, 2500, 500))
+    ax.set_xlim(0, 2000)
     plt.show()
 
 
