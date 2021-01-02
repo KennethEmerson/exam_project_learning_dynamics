@@ -1,5 +1,5 @@
 import numpy as np
-from agent import State
+from agent import State, Agent
 from move import *
 
 
@@ -126,6 +126,26 @@ class InternalModelRandom(InternalModel):
         pass
 
 
+class InternalSelfModel(InternalModelRandom):
+    """
+    Class  with self-model based action estimation. Action estimation
+        is based on self-policy instead of the internal model function
+    """
+
+    def __init__(self, initial_theta, agent):
+        super().__init__(initial_theta)
+        self.agent = agent
+
+    def get_state_action_estimation(self, state: State, action: int) -> float:
+        others_state = State(state.other_rel_position, state.rel_position)
+
+        probas = [np.exp(self.agent.get_q_value_with_random_state(others_state, other_action, action)
+                         / self.agent.temperature) for other_action in range(NB_MOVES)]
+        tot = sum(probas)
+
+        return probas[action] / tot
+
+
 def test():
     state = State((-1, 2), (2, 2))
     state_2 = State((3, 3), (2, 2))
@@ -145,6 +165,12 @@ def test():
     print(int_model2.get_action_prob(state))
     int_model2.update_state_action_estimation(state_2, 1, learning_episode=1)
     print(int_model2.get_action_prob(state_2))
+
+    agent = Agent(0.1, 0.5, 4., State((-10, -10), (10, 10)), 0.0)
+    int_model3 = InternalSelfModel(0.998849, agent)
+    print(int_model3.get_action_prob(state))
+    int_model3.update_state_action_estimation(state_2, 1, learning_episode=1)
+    print(int_model3.get_action_prob(state_2))
 
 
 if __name__ == "__main__":

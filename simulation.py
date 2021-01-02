@@ -5,6 +5,7 @@ from qwpae_agent import QwProposedAEAgent, QwRandomAEAgent
 from centralized_agent import Centralized_Agent, Agent_Interface
 from game import Game
 from move import *
+from qwsae_agent import QwSelfModelBaseAEAgent
 
 
 class HunterConfig:
@@ -190,6 +191,9 @@ def start_simulation(train_episodes_batch=10, eval_episodes=100, total_train_epi
 
     # Use this for QwRAE test run
     # config = HunterConfig("QwRAE",QwRandomAEAgent,game,theta=0.998849)
+
+    # Use this for QwSAE test run
+    # config = HunterConfig("QwSAE", QwSelfModelBaseAEAgent, game, theta=0.998849)
 
     simulation(game, config, train_episodes_batch, eval_episodes, total_train_episodes)
     save_results(config, total_train_episodes)
