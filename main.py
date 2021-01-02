@@ -14,7 +14,8 @@ import simulation
 
 
 def main():
-    simulation.start_simulation(10, 100, 2000)
+    # simulation.start_simulation(10, 100, 2000)
+    simulation.test_centralized_learner(10, 100, 2000)
 
 
 main()

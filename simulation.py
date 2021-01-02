@@ -2,6 +2,7 @@ import numpy as np
 import pickle
 from datetime import datetime
 from qwpae_agent import QwProposedAEAgent, QwRandomAEAgent
+from centralized_agent import Centralized_Agent, Agent_Interface
 from game import Game
 from move import *
 
@@ -29,6 +30,15 @@ class HunterConfig:
         self.average_time_steps = None
         self.total_training_episodes = 0
 
+class Centralized_Config:
+
+    def __init__(self, name, game, alpha = 0.3, gamma = 0.9, tau = 0.998849, initial_q = 0.0, theta=None):
+        self.name = name
+        hunter_manager = Centralized_Agent(alpha, gamma, tau, game.get_state_hunter_1(), initial_q, theta)
+        self.hunter_1 = Agent_Interface(0, hunter_manager)
+        self.hunter_2 = Agent_Interface(1, hunter_manager)
+        self.average_timesteps = None
+        self.total_training_episodes = 0
 
 def do_learning_episode(game: Game, hunters, episode: int):
     """
@@ -98,6 +108,7 @@ def simulation(game: Game, hunter_config: HunterConfig, train_episodes_batch: in
     hunter_1 = hunter_config.hunter_1
     hunter_2 = hunter_config.hunter_2
 
+
     average_time_steps = np.zeros(total_train_episodes // train_episodes_batch)
     start_time = datetime.now()
 
@@ -151,7 +162,7 @@ def start_simulation(train_episodes_batch=10, eval_episodes=100, total_train_epi
     and hunters in bin file.
     """
     playing_field = (7, 7)
-    
+
     reward = 1
     penalty = 0  # -1
 
@@ -169,5 +180,17 @@ def start_simulation(train_episodes_batch=10, eval_episodes=100, total_train_epi
     save_results(config, total_train_episodes)
 
 
+def test_centralized_learner(train_episodes_batch=10, eval_episodes=100, total_train_episodes=2000):
+    playing_field = (7, 7)
+    reward = 1
+    penalty = 0  # -1
+
+    game = Game(playing_field, reward, penalty)
+    config = Centralized_Config("Centralized", game, theta=0.998849)
+
+    simulation(game, config, train_episodes_batch, eval_episodes, total_train_episodes)
+    save_results(config, total_train_episodes)
+
 if __name__ == "__main__":
-    start_simulation()
+    # start_simulation()
+    test_centralized_learner()

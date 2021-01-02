@@ -3,7 +3,7 @@ import pickle
 import math
 import os.path
 import matplotlib.pyplot as plt
-from simulation import HunterConfig
+from simulation import HunterConfig, Centralized_Config
 
 def load_hunter_config_from_bin(filename: str):
     """
@@ -89,7 +89,8 @@ if __name__ == "__main__":
     # add filenames in list which you want on plot
     # both CSV results and hunterconfig binary files can be used
     file_list = [
-        "hunters_QwPAE_31122020_1908.bin",
+        # "hunters_QwPAE_31122020_1908.bin",
+        "results_Centralized_02012021_0053.csv",
         # "results_QwPAE_20201230_003849.csv",
     ]
     plot_graph(file_list)

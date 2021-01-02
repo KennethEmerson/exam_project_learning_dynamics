@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 
 from game import Game
-from simulation import HunterConfig
+from simulation import HunterConfig, Centralized_Config
 
 
 def game_showcase(game: Game, hunter_config: HunterConfig):
@@ -77,9 +77,10 @@ if __name__ == "__main__":
     playing_field = (7, 7)
     dict_action_to_coord = {MOVE_TOP: (0, -1), MOVE_RIGHT: (1, 0), MOVE_BOTTOM: (0, 1), MOVE_LEFT: (-1, 0),
                             MOVE_STAY: (0, 0)}
-    
+
     reward = 1
     penalty = -1
 
     game = Game(playing_field, reward, penalty)
-    showcase_from_file(game, "hunters_QwPAE_01012021_0134.bin")
+    # showcase_from_file(game, "hunters_QwPAE_01012021_0134.bin")
+    showcase_from_file(game, "hunters_Centralized_02012021_0053.bin")

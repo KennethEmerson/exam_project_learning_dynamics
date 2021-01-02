@@ -120,7 +120,7 @@ class QwRandomAEAgent(QwProposedAEAgent):
         #max_probability = max(moves_probability)
         #return moves_probability[moves_probability.index(max_probability)]
 
-        
+
         return self.get_q_value_with_random_state(future_state,action,np.random.choice(NB_MOVES))
 
 
