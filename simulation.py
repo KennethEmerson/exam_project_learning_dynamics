@@ -34,7 +34,7 @@ class Centralized_Config:
 
     def __init__(self, name, game, alpha = 0.3, gamma = 0.9, tau = 0.998849, initial_q = 0.0, theta=None):
         self.name = name
-        hunter_manager = Centralized_Agent(alpha, gamma, tau, game.get_state_hunter_1(), initial_q,theta)
+        hunter_manager = Centralized_Agent(alpha, gamma, tau, game.get_state_hunter_1(), initial_q, theta)
         self.hunter_1 = Sub_Agent(0, hunter_manager)
         self.hunter_2 = Sub_Agent(1, hunter_manager)
         self.average_timesteps = None
@@ -193,4 +193,4 @@ def test_centralized_learner(train_episodes_batch=10, eval_episodes=100, total_t
 
 if __name__ == "__main__":
     # start_simulation()
-    test_centralized_learner(1,1,10)
+    test_centralized_learner()

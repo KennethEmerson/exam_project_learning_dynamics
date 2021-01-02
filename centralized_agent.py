@@ -40,10 +40,10 @@ class Centralized_Agent(Agent):
                 initial_q_value=0.0, theta=0.998849):
         Agent.__init__(self, learning_rate, discount_rate, temperature, initial_state,
                     initial_q_value, theta)
-        #not necessary ?
+
         self.internal_model = Centralized_Internal_Model(theta)
-        self.action_choice = [None,None]
-        self.agent_state = [None,None]
+        self.action_choice = (None,None)
+        self.agent_state = [initial_state,None]
 
     def set_agent_state(self, id, state):
         self.agent_state[id] = state
@@ -71,7 +71,7 @@ class Centralized_Agent(Agent):
         :return: The action chosen (MOVE_*)
         """
         action_pairs = [(action_1,action_2) for action_1 in range(NB_MOVES) for action_2 in range(NB_MOVES)]
-        probas = [np.exp(self.get_q_value_for_action_pair(self.state, action_pair) / self.temperature) for action_pair in action_pairs]
+        probas = [np.exp(self.get_q_value_for_action_pair(self.agent_state[0], action_pair) / self.temperature) for action_pair in action_pairs]
         tot = sum(probas)
         probas = [p / tot for p in probas]
         action_choice_idx = np.random.choice(range(len(action_pairs)), p=probas)
@@ -112,7 +112,7 @@ class Centralized_Agent(Agent):
         if self.theta is None:
             other_action = None
 
-        qValue = self.get_q_value_for_action_pair(self.state, (action, other_action))  # create & initialize it if it doesn't exist
+        qValue = self.get_q_value_for_action_pair(self.agent_state[0], (action, other_action))  # create & initialize it if it doesn't exist
 
         qValue = (1 - self.learning_rate) * qValue\
                  + self.learning_rate * (reward + self.discount_rate * self.max_EV_next(new_state))
@@ -120,6 +120,7 @@ class Centralized_Agent(Agent):
         self.update_q_value(qValue, action, other_action)
 
         self.set_agent_state(id, new_state)
+        self.state = new_state
 
 
 
