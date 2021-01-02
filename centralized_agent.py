@@ -1,31 +1,35 @@
 import numpy as np
 from agent import State, Agent
-
-MOVE_LEFT = 0
-MOVE_RIGHT = 1
-MOVE_TOP = 2
-MOVE_BOTTOM = 3
-MOVE_STAY = 4
-NB_MOVES = MOVE_STAY + 1
-
+from move import *
 
 class Agent_Interface:
+    """
+    Interface allowing @simulation to handle the agents individually, although
+    they are controlled by the @Centralized_Agent. The first agent transfers all
+    the requests to the CA.
+    """
 
-    def __init__(self, id, CA): # should have CA ?
+    def __init__(self, id, CA):
         self.id = id
         self.CA = CA
 
-    def choose_next_action(self): # is set by CA
+    def choose_next_action(self):
+        """
+        Transfer request to CA. The action is computed and returned to the agent based on its id.
+        """
         return self.CA.get_next_action(self.id)
 
     def set_state(self, state):
+        """
+        Transfer request to CA. The second request is ignored as only the state of the first agent is used.
+        """
         if self.id == 0:
             self.CA.set_state(state)
 
     def update(self, new_state: State, action: int, reward: float, other_action: int,episode=1) -> None: # update the CA
         """
-        Update the Centralized Agent the first time only.
-
+        Transfer request to CA. The second request is ignored all the update information is present in the first call.
+        : param ... :
         """
         if self.id == 0:
             self.CA.update(new_state, action, reward, other_action, episode)
@@ -33,6 +37,10 @@ class Agent_Interface:
 
 
 class Centralized_Agent(Agent):
+    """
+    Interface allowing @simulation to handle the agents individually, although
+    they are controlled by the @Centralized_Agent.
+    """
     def __init__(self, learning_rate: float, discount_rate: float, temperature: float, initial_state: State,
                 initial_q_value=0.0, theta=0.998849):
         Agent.__init__(self, learning_rate, discount_rate, temperature, initial_state,
