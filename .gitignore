@@ -6,3 +6,6 @@ venv/
 *.bin
 *.png
 *.csv
+
+!results/**/*.bin
+!results/**/*.csv

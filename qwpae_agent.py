@@ -42,7 +42,7 @@ class QwProposedAEAgent(Agent):
                          self.get_q_value(action, other_action))
         return sum
 
-    def predict_reward2(self, future_state: State, action: int) -> float:
+    def predict_reward(self, future_state: State, action: int) -> float:
         """
         Predict the reward if we go into future_state by
         doing the specified action.
@@ -64,24 +64,6 @@ class QwProposedAEAgent(Agent):
                     max_q = q
 
         return max_q
-
-    def predict_reward(self, future_state: State, action: int) -> float:
-        """
-        Predict the reward if we go into future_state by
-        doing the specified action.
-
-        :param future_state: The future state to be in.
-        :param action: The action done to get into that
-            state.
-
-        :return: The predicted reward.
-        """
-        #moves_probability = self.internal_model.get_action_prob(future_state)
-        #max_probability = max(moves_probability)
-        #return moves_probability[moves_probability.index(max_probability)]
-
-        action_other_optimal = np.argmax(self.internal_model.get_action_prob(future_state))
-        return self.get_q_value_with_random_state(future_state,action,action_other_optimal)
 
     def update(self, new_state: State, action: int, reward: float, other_action: int, episode=1):
         """
