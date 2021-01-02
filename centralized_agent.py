@@ -4,7 +4,7 @@ from move import *
 
 class Agent_Interface:
     """
-    Interface allowing @simulation to handle the agents individually, although
+    Interface allowing @Simulation to handle the agents individually, although
     they are controlled by the @Centralized_Agent. The first agent transfers all
     the requests to the CA.
     """
@@ -28,7 +28,7 @@ class Agent_Interface:
 
     def update(self, new_state: State, action: int, reward: float, other_action: int,episode=1) -> None: # update the CA
         """
-        Transfer request to CA. The second request is ignored all the update information is present in the first call.
+        Transfer request to CA. The second request is ignored as all the update information is present in the first call.
         : param ... :
         """
         if self.id == 0:
@@ -38,9 +38,10 @@ class Agent_Interface:
 
 class Centralized_Agent(Agent):
     """
-    Interface allowing @simulation to handle the agents individually, although
-    they are controlled by the @Centralized_Agent.
+    Structure coordinating the actions of both agents. It uses the state of the first agent, and communicates with the
+    @Simulation using the Agent_Interface representing the agents.
     """
+
     def __init__(self, learning_rate: float, discount_rate: float, temperature: float, initial_state: State,
                 initial_q_value=0.0, theta=0.998849):
         Agent.__init__(self, learning_rate, discount_rate, temperature, initial_state,
@@ -53,24 +54,20 @@ class Centralized_Agent(Agent):
         self.state = state
 
     def get_next_action(self, id):
+        """
+        Choose and sets the two agent's actions on first call.
+        Returns the action of the agent of corresponding id.
+        """
         if id==0:
-            self.set_next_action()
+            self.action_choice = self.boltzmann()
             return self.action_choice[0]
         return self.action_choice[1]
-
-
-    def set_next_action(self):
-        """
-        Choose the next action based on the current state and set it
-        to the action_choice variable.
-
-        """
-        self.action_choice = self.boltzmann()
 
     #override
     def boltzmann(self) -> tuple:
         """
-        Boltzmann function based on the Q-values of previous actions
+        Boltzmann function based on the Q-values of the possible next
+        action pairs.
 
         :return: The action chosen (MOVE_*)
         """
@@ -85,11 +82,10 @@ class Centralized_Agent(Agent):
 
     def get_q_value_for_action_pair(self, state: State, action: tuple) -> float:
         """
-        Get the q value based on the current state.
+        Get the q value of the action pair given the state.
 
-        :param action: The action taken.
-        :param other_action: The other player action (None if
-            ignored).
+        :param state: the considered state
+        :param action: the action pair
 
         :return: The q value.
         """
@@ -105,11 +101,11 @@ class Centralized_Agent(Agent):
         """
         Update the agent.
 
-        :param new_state: The new state the agent is in.
-        :param action: The action done by the agent (MOVE_*).
+        :param new_state: The new state of the first agent.
+        :param action: The action done by the first agent (MOVE_*).
         :param reward: The reward obtained.
-        :param other_action: The other agent action
-        :param episode: the episode of the game
+        :param other_action: The other agent action.
+        :param episode: The episode of the game.
         """
 
         self.temperature = self.get_actual_theta(episode) # in paper theta and tau are equal
@@ -155,7 +151,9 @@ class Centralized_Agent(Agent):
     def predict_reward(self, future_state: State, action: tuple)->float:
         """
         Predict the reward if we go into future_state by
-        doing the specified action.
+        doing the specified action. The expected value is
+        stochastic but stationnary and corresponds to the Q-value of the
+        action pair.
 
         :param future_state: The future state to be in.
         :param action: The action done to get into that
