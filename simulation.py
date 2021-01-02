@@ -2,7 +2,7 @@ import numpy as np
 import pickle
 from datetime import datetime
 from qwpae_agent import QwProposedAEAgent, QwRandomAEAgent
-from centralized_agent import Centralized_Agent, Sub_Agent
+from centralized_agent import Centralized_Agent, Agent_Interface
 from game import Game
 from move import *
 
@@ -35,8 +35,8 @@ class Centralized_Config:
     def __init__(self, name, game, alpha = 0.3, gamma = 0.9, tau = 0.998849, initial_q = 0.0, theta=None):
         self.name = name
         hunter_manager = Centralized_Agent(alpha, gamma, tau, game.get_state_hunter_1(), initial_q, theta)
-        self.hunter_1 = Sub_Agent(0, hunter_manager)
-        self.hunter_2 = Sub_Agent(1, hunter_manager)
+        self.hunter_1 = Agent_Interface(0, hunter_manager)
+        self.hunter_2 = Agent_Interface(1, hunter_manager)
         self.average_timesteps = None
         self.total_training_episodes = 0
 

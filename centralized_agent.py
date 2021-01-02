@@ -1,6 +1,5 @@
 import numpy as np
 from agent import State, Agent
-from centralized_internal_model import Centralized_Internal_Model, Actions
 
 MOVE_LEFT = 0
 MOVE_RIGHT = 1
@@ -10,7 +9,7 @@ MOVE_STAY = 4
 NB_MOVES = MOVE_STAY + 1
 
 
-class Sub_Agent:
+class Agent_Interface:
 
     def __init__(self, id, CA): # should have CA ?
         self.id = id
@@ -20,7 +19,8 @@ class Sub_Agent:
         return self.CA.get_next_action(self.id)
 
     def set_state(self, state):
-        self.CA.set_agent_state(self.id, state)
+        if self.id == 0:
+            self.CA.set_state(state)
 
     def update(self, new_state: State, action: int, reward: float, other_action: int,episode=1) -> None: # update the CA
         """
@@ -28,10 +28,7 @@ class Sub_Agent:
 
         """
         if self.id == 0:
-            self.CA.update(self.id, new_state, action, reward, other_action, episode)
-        else:
-            self.set_state(new_state) # dont update the q-function twice
-
+            self.CA.update(new_state, action, reward, other_action, episode)
 
 
 
@@ -41,12 +38,11 @@ class Centralized_Agent(Agent):
         Agent.__init__(self, learning_rate, discount_rate, temperature, initial_state,
                     initial_q_value, theta)
 
-        self.internal_model = Centralized_Internal_Model(theta)
+        self.initial_theta = theta
         self.action_choice = (None,None)
-        self.agent_state = [initial_state,None]
 
-    def set_agent_state(self, id, state):
-        self.agent_state[id] = state
+    def set_state(self, state):
+        self.state = state
 
     def get_next_action(self, id):
         if id==0:
@@ -71,7 +67,7 @@ class Centralized_Agent(Agent):
         :return: The action chosen (MOVE_*)
         """
         action_pairs = [(action_1,action_2) for action_1 in range(NB_MOVES) for action_2 in range(NB_MOVES)]
-        probas = [np.exp(self.get_q_value_for_action_pair(self.agent_state[0], action_pair) / self.temperature) for action_pair in action_pairs]
+        probas = [np.exp(self.get_q_value_for_action_pair(self.state, action_pair) / self.temperature) for action_pair in action_pairs]
         tot = sum(probas)
         probas = [p / tot for p in probas]
         action_choice_idx = np.random.choice(range(len(action_pairs)), p=probas)
@@ -97,7 +93,7 @@ class Centralized_Agent(Agent):
             return self.initial_q_value
 
 
-    def update(self, id: int, new_state: State, action: int, reward: float, other_action: int,episode=1) -> None:
+    def update(self, new_state: State, action: int, reward: float, other_action: int,episode=1) -> None:
         """
         Update the agent.
 
@@ -107,21 +103,20 @@ class Centralized_Agent(Agent):
         :param other_action: The other agent action
         :param episode: the episode of the game
         """
-        self.temperature = self.internal_model.get_actual_theta(episode) # in paper theta and tau are equal
+
+        self.temperature = self.get_actual_theta(episode) # in paper theta and tau are equal
 
         if self.theta is None:
             other_action = None
 
-        qValue = self.get_q_value_for_action_pair(self.agent_state[0], (action, other_action))  # create & initialize it if it doesn't exist
+        qValue = self.get_q_value_for_action_pair(self.state, (action, other_action))  # create & initialize it if it doesn't exist
 
         qValue = (1 - self.learning_rate) * qValue\
                  + self.learning_rate * (reward + self.discount_rate * self.max_EV_next(new_state))
 
         self.update_q_value(qValue, action, other_action)
 
-        self.set_agent_state(id, new_state)
-        self.state = new_state
-
+        self.set_state(new_state)
 
 
     def max_EV_next(self, new_state: State) -> float:
@@ -138,7 +133,6 @@ class Centralized_Agent(Agent):
         # @TODO: take into account the prey moves (if it changes something?)
 
         ev_max = None
-
 
         action_pairs = [(action_1,action_2) for action_1 in range(NB_MOVES) for action_2 in range(NB_MOVES)]
         for action in action_pairs:
@@ -163,24 +157,13 @@ class Centralized_Agent(Agent):
         """
         return self.get_q_value_for_action_pair(future_state, action)
 
+    def get_actual_theta(self, episode: int) -> float:
+        """
+        Calculate the value of theta in function of the
+        episode (see paper page 5, bottom left).
 
+        :param episode: the learning episode
 
-
-def test():
-    alpha = 0.1
-    gamma = 0.5
-    tau = 4.
-    state = State((-10, -10), (10, 10))
-    initial_q = 0.0
-
-    agent = Qwpae_Agent(alpha, gamma, tau, state, initial_q)
-    action = agent.choose_next_action()
-    print(action)
-    new_pos = agent.compute_new_position(action, (-10, -10))
-    new_state = State(new_pos, (10, 9))
-    agent.update(new_state, action, 5)
-
-    action = agent.choose_next_action()
-    print(action)
-if __name__ == "__main__":
-    test()
+        :return: The actual value of theta for the specific episode
+        """
+        return 0.2 * (self.initial_theta ** episode)
