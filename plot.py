@@ -95,6 +95,8 @@ def plot_graph(file_list: [str], is_std_included=True):
             ax_std.plot(episodes_x, std_data, label=name, linewidth=0.6, color=color_list[file_index])
             ax_std.set_xlabel('number of learning episodes')
             ax_std.set_ylabel('standard deviation')
+            ax_std.set_xticks(np.arange(0, 2500, 500))
+            ax_std.set_xlim(0, 2000)
             # ax.fill_between(episodes_x, average_data+std_data, average_data-std_data, color=color_list[file_index], alpha=0.4)
             #ax.plot(episodes_x, max_data,linestyle=':', linewidth=0.6,color=color_list[file_index])
             #ax.plot(episodes_x, min_data,linestyle=':', linewidth=0.6,color=color_list[file_index])
