@@ -9,7 +9,7 @@ from move import *
 
 class HunterConfig:
     """
-    Contain the configuration of the agents playing the game.
+    Contain the configuration of the hunters playing the game.
     """
 
     def __init__(self, name, agent_type, game, alpha=0.3, gamma=0.9, tau=0.998849, initial_q=0.0, theta=None):
@@ -31,14 +31,29 @@ class HunterConfig:
         self.total_training_episodes = 0
 
 class Centralized_Config:
+    """
+    Contain the configuration an agent coordinating the action of two hunters.
+    """
 
     def __init__(self, name, game, alpha = 0.3, gamma = 0.9, tau = 0.998849, initial_q = 0.0, theta=None):
+        """initialize the hunter configuration
+
+        :param name: Name of the agent type, will be used as label for the plot.
+        :param agent_type: The agent class to be used to initialize the agents.
+        :param game: The game that will be played.
+        :param alpha: Alpha value used by agents. Defaults to 0.1.
+        :param gamma: Gamma value used by agents. Defaults to 0.5.
+        :param tau: Temperature used. Defaults to 0.998849.
+        :param initial_q: The initial Q-value in the Q-table. Defaults to 0.0.
+        :param theta: Used as initial theta for agents with internal model.
+        """
         self.name = name
         hunter_manager = Centralized_Agent(alpha, gamma, tau, game.get_state_hunter_1(), initial_q, theta)
         self.hunter_1 = Agent_Interface(0, hunter_manager)
         self.hunter_2 = Agent_Interface(1, hunter_manager)
         self.average_timesteps = None
         self.total_training_episodes = 0
+
 
 def do_learning_episode(game: Game, hunters, episode: int):
     """
