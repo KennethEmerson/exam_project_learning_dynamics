@@ -29,7 +29,17 @@ class HunterConfig:
         self.hunter_1 = agent_type(alpha, gamma, tau, game.get_state_hunter_1(), initial_q, theta)
         self.hunter_2 = agent_type(alpha, gamma, tau, game.get_state_hunter_2(), initial_q, theta)
         self.average_time_steps = None
+        self.std_time_steps = None
         self.total_training_episodes = 0
+
+class HunterConfig_Std(HunterConfig):
+    """adds Std to the Hunter configuration"""
+    def __init__(self, name, agent_type, game, alpha=0.3, gamma=0.9, tau=0.998849, initial_q=0.0, theta=None):
+        HunterConfig.__init__(self,name, agent_type, game, alpha, gamma, tau, initial_q, theta)
+        self.std_time_steps = None
+        self.max_time_steps = None
+        self.min_time_steps = None
+        self.mae_time_Steps = None
 
 class Centralized_Config:
     """
@@ -52,9 +62,18 @@ class Centralized_Config:
         hunter_manager = Centralized_Agent(alpha, gamma, tau, game.get_state_hunter_1(), initial_q, theta)
         self.hunter_1 = Agent_Interface(0, hunter_manager)
         self.hunter_2 = Agent_Interface(1, hunter_manager)
+        self.std_time_steps = None
         self.average_timesteps = None
         self.total_training_episodes = 0
 
+class Centralized_Config_Std(Centralized_Config):
+    """adds Std to centralized Configuration """
+    def __init__(self, name, game, alpha = 0.3, gamma = 0.9, tau = 0.998849, initial_q = 0.0, theta=None):
+        Centralized_Config.__init__(self,name, game, alpha, gamma, tau, initial_q, theta)
+        self.std_time_steps = None
+        self.max_time_steps = None
+        self.min_time_steps = None
+        self.mae_time_Steps = None
 
 def do_learning_episode(game: Game, hunters, episode: int):
     """
@@ -126,6 +145,11 @@ def simulation(game: Game, hunter_config: HunterConfig, train_episodes_batch: in
 
 
     average_time_steps = np.zeros(total_train_episodes // train_episodes_batch)
+    std_time_steps = np.zeros(total_train_episodes // train_episodes_batch)
+    max_time_steps = np.zeros(total_train_episodes // train_episodes_batch)
+    min_time_steps = np.zeros(total_train_episodes // train_episodes_batch)
+    mae_time_steps = np.zeros(total_train_episodes // train_episodes_batch)
+
     start_time = datetime.now()
 
     for episode in range(total_train_episodes):
@@ -138,13 +162,28 @@ def simulation(game: Game, hunter_config: HunterConfig, train_episodes_batch: in
             for eval_episode in range(eval_episodes):
                 time_steps[eval_episode] = do_evaluation_episode(game, (hunter_1, hunter_2))
 
-            average_time_steps[episode // train_episodes_batch] = np.average(time_steps)
-            print(f"average timesteps evaluation: {average_time_steps[episode // train_episodes_batch]}")
+            index = episode // train_episodes_batch
+            average_time_steps[index] = np.average(time_steps)
+            std_time_steps[index] = np.std(time_steps)
+            max_time_steps[index] = np.max(time_steps)
+            min_time_steps[index] = np.min(time_steps)
+            mae_time_steps[index] = np.average(np.abs(time_steps-average_time_steps[index]))
+            print(f"timesteps evaluation: (average: {average_time_steps[index]}," +
+                                           f" std: {round(std_time_steps[index])})" +
+                                           f" min: {min_time_steps[index]}, max: {max_time_steps[index]}," + 
+                                           f" MAE: {mae_time_steps[index]}")
 
         # Do one learning episode
         do_learning_episode(game, (hunter_1, hunter_2), episode)
 
     hunter_config.average_time_steps = average_time_steps
+    
+    #added for backward compatibility with older hunter_configs
+    if hasattr(hunter_config, 'std_time_steps'):
+        hunter_config.std_time_steps = std_time_steps
+        hunter_config.max_time_steps = max_time_steps
+        hunter_config.min_time_steps = min_time_steps
+        hunter_config.mae_time_Steps = mae_time_steps
 
     end_time = datetime.now()
     print(f"\nduration testrun:{end_time - start_time}")

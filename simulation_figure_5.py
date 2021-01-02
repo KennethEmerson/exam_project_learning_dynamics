@@ -22,7 +22,7 @@ def simulation_figure_5():
     theta=0.998849
 
     # Use this for Centralized learning
-    """config = Centralized_Config(name="Centralized Q-learning",
+    """config = Centralized_Config_Std(name="Centralized Q-learning",
                                 game=game,
                                 alpha= alpha,\
                                 gamma= gamma,\
@@ -31,7 +31,7 @@ def simulation_figure_5():
                                 theta=0.998849)"""
     
     # Use this for QwPAE test run
-    """config = HunterConfig(name="Q-learning with proposed action estimation",\
+    """config = HunterConfig_Std(name="Q-learning with proposed action estimation",\
                           agent_type= QwProposedAEAgent,\
                           game= game,\
                           alpha= alpha,\
@@ -41,7 +41,7 @@ def simulation_figure_5():
                           theta=0.998849)"""
 
     # Use this for QwRAE test run
-    config = HunterConfig(name="Q-learning with randomly action estimation",\
+    config = HunterConfig_Std(name="Q-learning with randomly action estimation",\
                           agent_type= QwRandomAEAgent,\
                           game= game,\
                           alpha= alpha,\
