@@ -1,10 +1,11 @@
 import pickle
-import numpy as np
+
 import matplotlib.pyplot as plt
+import numpy as np
 from matplotlib.animation import FuncAnimation
 
 from game import Game
-from simulation import HunterConfig, Centralized_Config
+from simulation import HunterConfig
 
 
 def game_showcase(game: Game, hunter_config: HunterConfig):
@@ -51,7 +52,6 @@ def game_showcase(game: Game, hunter_config: HunterConfig):
         ax.imshow(data)
         return [ax]
 
-    #game.prey_action_prob = np.array([1/4,1/4,1/4,1/4,0])
     ani = FuncAnimation(fig, animate, interval=200, blit=True)
     plt.show()
 
@@ -82,5 +82,4 @@ if __name__ == "__main__":
     penalty = -1
 
     game = Game(playing_field, reward, penalty)
-    # showcase_from_file(game, "hunters_QwPAE_01012021_0134.bin")
     showcase_from_file(game, "hunters_Centralized_02012021_0053.bin")

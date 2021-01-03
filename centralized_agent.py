@@ -1,6 +1,6 @@
 import numpy as np
 from agent import State, Agent
-from move import *
+from move import NB_MOVES
 
 class Agent_Interface:
     """
@@ -26,14 +26,14 @@ class Agent_Interface:
         if self.id == 0:
             self.CA.set_state(state)
 
-    def update(self, new_state: State, action: int, reward: float, other_action: int,episode=1) -> None: # update the CA
+    def update(self, new_state: State, action: int, reward: float, other_action: int,
+               episode=1) -> None:  # update the CA
         """
         Transfer request to CA. The second request is ignored as all the update information is present in the first call.
         : param ... :
         """
         if self.id == 0:
             self.CA.update(new_state, action, reward, other_action, episode)
-
 
 
 class Centralized_Agent(Agent):
@@ -43,12 +43,12 @@ class Centralized_Agent(Agent):
     """
 
     def __init__(self, learning_rate: float, discount_rate: float, temperature: float, initial_state: State,
-                initial_q_value=0.0, theta=0.998849):
+                 initial_q_value=0.0, theta=0.998849):
         Agent.__init__(self, learning_rate, discount_rate, temperature, initial_state,
-                    initial_q_value, theta)
+                       initial_q_value, theta)
 
         self.initial_theta = theta
-        self.action_choice = (None,None)
+        self.action_choice = (None, None)
 
     def set_state(self, state):
         self.state = state
@@ -58,12 +58,12 @@ class Centralized_Agent(Agent):
         Choose and sets the two agent's actions on first call.
         Returns the action of the agent of corresponding id.
         """
-        if id==0:
+        if id == 0:
             self.action_choice = self.boltzmann()
             return self.action_choice[0]
         return self.action_choice[1]
 
-    #override
+    # override
     def boltzmann(self) -> tuple:
         """
         Boltzmann function based on the Q-values of the possible next
@@ -71,14 +71,14 @@ class Centralized_Agent(Agent):
 
         :return: The action chosen (MOVE_*)
         """
-        action_pairs = [(action_1,action_2) for action_1 in range(NB_MOVES) for action_2 in range(NB_MOVES)]
-        probas = [np.exp(self.get_q_value_for_action_pair(self.state, action_pair) / self.temperature) for action_pair in action_pairs]
+        action_pairs = [(action_1, action_2) for action_1 in range(NB_MOVES) for action_2 in range(NB_MOVES)]
+        probas = [np.exp(self.get_q_value_for_action_pair(self.state, action_pair) / self.temperature) for action_pair
+                  in action_pairs]
         tot = sum(probas)
         probas = [p / tot for p in probas]
         action_choice_idx = np.random.choice(range(len(action_pairs)), p=probas)
         action_choice = action_pairs[action_choice_idx]
         return action_choice
-
 
     def get_q_value_for_action_pair(self, state: State, action: tuple) -> float:
         """
@@ -96,8 +96,7 @@ class Centralized_Agent(Agent):
             self.q_table[qIndex] = self.initial_q_value
             return self.initial_q_value
 
-
-    def update(self, new_state: State, action: int, reward: float, other_action: int,episode=1) -> None:
+    def update(self, new_state: State, action: int, reward: float, other_action: int, episode=1) -> None:
         """
         Update the agent.
 
@@ -108,20 +107,20 @@ class Centralized_Agent(Agent):
         :param episode: The episode of the game.
         """
 
-        self.temperature = self.get_actual_theta(episode) # in paper theta and tau are equal
+        self.temperature = self.get_actual_theta(episode)  # in paper theta and tau are equal
 
         if self.theta is None:
             other_action = None
 
-        qValue = self.get_q_value_for_action_pair(self.state, (action, other_action))  # create & initialize it if it doesn't exist
+        qValue = self.get_q_value_for_action_pair(self.state,
+                                                  (action, other_action))  # create & initialize it if it doesn't exist
 
-        qValue = (1 - self.learning_rate) * qValue\
+        qValue = (1 - self.learning_rate) * qValue \
                  + self.learning_rate * (reward + self.discount_rate * self.max_EV_next(new_state))
 
         self.update_q_value(qValue, action, other_action)
 
         self.set_state(new_state)
-
 
     def max_EV_next(self, new_state: State) -> float:
         """
@@ -138,7 +137,7 @@ class Centralized_Agent(Agent):
 
         ev_max = None
 
-        action_pairs = [(action_1,action_2) for action_1 in range(NB_MOVES) for action_2 in range(NB_MOVES)]
+        action_pairs = [(action_1, action_2) for action_1 in range(NB_MOVES) for action_2 in range(NB_MOVES)]
         for action in action_pairs:
             ev = self.predict_reward(new_state, action)
 
@@ -147,8 +146,7 @@ class Centralized_Agent(Agent):
 
         return ev_max
 
-
-    def predict_reward(self, future_state: State, action: tuple)->float:
+    def predict_reward(self, future_state: State, action: tuple) -> float:
         """
         Predict the reward if we go into future_state by
         doing the specified action. The expected value is

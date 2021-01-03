@@ -1,4 +1,5 @@
 import numpy as np
+
 from agent import State, Agent
 from move import *
 
@@ -139,11 +140,6 @@ class InternalSelfModel(InternalModelRandom):
     def get_state_action_estimation(self, state: State, action: int) -> float:
         others_state = State(state.other_rel_position, state.rel_position)
 
-        """probas = [np.exp(sum(
-            [self.agent.get_q_value_with_random_state(others_state, first_action, second_action) for second_action in
-             range(NB_MOVES)])
-                         / self.agent.temperature) for first_action in range(NB_MOVES)]"""
-
         probas = [np.exp(self.agent.get_q_value_with_random_state(others_state, other_action, action)
                          / self.agent.temperature) for other_action in range(NB_MOVES)]
         tot = sum(probas)
@@ -154,7 +150,7 @@ class InternalSelfModel(InternalModelRandom):
 def test():
     state = State((-1, 2), (2, 2))
     state_2 = State((3, 3), (2, 2))
-    int_model = InternalModel(5, 0.998849)
+    int_model = InternalModel(0.998849)
     print(int_model.get_action_prob(state))
 
     for i in range(0, 4):
@@ -166,16 +162,10 @@ def test():
         int_model.update_state_action_estimation(state, 1, learning_episode=1)
         print(int_model.get_action_prob(state))
 
-    int_model2 = InternalModelRandom(5, 0.998849)
+    int_model2 = InternalModelRandom(0.998849)
     print(int_model2.get_action_prob(state))
     int_model2.update_state_action_estimation(state_2, 1, learning_episode=1)
     print(int_model2.get_action_prob(state_2))
-
-    agent = Agent(0.1, 0.5, 4., State((-10, -10), (10, 10)), 0.0)
-    int_model3 = InternalSelfModel(0.998849, agent)
-    print(int_model3.get_action_prob(state))
-    int_model3.update_state_action_estimation(state_2, 1, learning_episode=1)
-    print(int_model3.get_action_prob(state_2))
 
 
 if __name__ == "__main__":

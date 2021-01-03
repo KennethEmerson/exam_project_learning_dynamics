@@ -34,7 +34,7 @@ class Agent:
         self.state = initial_state
         self.theta = theta
 
-    def get_q_value(self, action: int, other_action: int=None) -> float:
+    def get_q_value(self, action: int, other_action: int = None) -> float:
         """
         Get the q value based on the current state.
 
@@ -85,7 +85,7 @@ class Agent:
 
         qValue = self.get_q_value(action, other_action)  # create & initialize it if it doesn't exist
 
-        qValue = (1 - self.learning_rate) * qValue\
+        qValue = (1 - self.learning_rate) * qValue \
                  + self.learning_rate * (reward + self.discount_rate * self.max_EV_next(new_state))
 
         self.update_q_value(qValue, action, other_action)

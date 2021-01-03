@@ -1,9 +1,10 @@
-import numpy as np
-import pickle
 import math
 import os.path
+import pickle
+
 import matplotlib.pyplot as plt
-from simulation import HunterConfig, Centralized_Config
+import numpy as np
+
 
 def load_hunter_config_from_bin(filename: str):
     """
@@ -44,12 +45,12 @@ def create_data_for_one_plot(filename: str) -> (str, np.array, int):
         name = test_case.name
         total_training_episodes = test_case.total_training_episodes
         average_data = test_case.average_time_steps
-        if hasattr(test_case,'std_time_steps'):
+        if hasattr(test_case, 'std_time_steps'):
             std_data = test_case.std_time_steps
             max_data = test_case.max_time_steps
             min_data = test_case.min_time_steps
             mae_data = test_case.mae_time_Steps
-        else: 
+        else:
             std_data = None
             max_data = None
             min_data = None
@@ -76,7 +77,7 @@ def plot_graph(file_list: [str], is_std_included=True):
         created. They can be CSV files with measurements, a Hunteconfiguration
         bin files or a mix of both.
     """
-    color_list=['b','g','r','c','m']
+    color_list = ['b', 'g', 'r', 'c', 'm']
     if is_std_included:
         fig, (ax, ax_std) = plt.subplots(2, 1, figsize=(6, 5 + 2), gridspec_kw={'height_ratios': [5, 2]})
     else:
@@ -85,12 +86,13 @@ def plot_graph(file_list: [str], is_std_included=True):
     max_y_values = np.zeros(len(file_list))
 
     for file_index, filename in enumerate(file_list):
-        name, average_data, std_data, max_data, min_data, mae_data,total_training_episodes = create_data_for_one_plot(filename)
+        name, average_data, std_data, max_data, min_data, mae_data, total_training_episodes = create_data_for_one_plot(
+            filename)
         max_x_values[file_index] = total_training_episodes
         max_y_values[file_index] = int(math.ceil(np.max(average_data) / 100)) * 100
         sample_points = average_data.size
         episodes_x = np.linspace(0, total_training_episodes, num=sample_points)
-        ax.plot(episodes_x, average_data, label=name, linewidth=0.6,color=color_list[file_index])
+        ax.plot(episodes_x, average_data, label=name, linewidth=0.6, color=color_list[file_index])
         if std_data is not None and is_std_included:
             ax_std.plot(episodes_x, std_data, label=name, linewidth=0.6, color=color_list[file_index])
             ax_std.set_xlabel('number of learning episodes')
@@ -98,9 +100,9 @@ def plot_graph(file_list: [str], is_std_included=True):
             ax_std.set_xticks(np.arange(0, 2500, 500))
             ax_std.set_xlim(0, 2000)
             # ax.fill_between(episodes_x, average_data+std_data, average_data-std_data, color=color_list[file_index], alpha=0.4)
-            #ax.plot(episodes_x, max_data,linestyle=':', linewidth=0.6,color=color_list[file_index])
-            #ax.plot(episodes_x, min_data,linestyle=':', linewidth=0.6,color=color_list[file_index])
-            #ax.fill_between(episodes_x, max_data, min_data, color=color_list[file_index], alpha=0.3)
+            # ax.plot(episodes_x, max_data,linestyle=':', linewidth=0.6,color=color_list[file_index])
+            # ax.plot(episodes_x, min_data,linestyle=':', linewidth=0.6,color=color_list[file_index])
+            # ax.fill_between(episodes_x, max_data, min_data, color=color_list[file_index], alpha=0.3)
     if not is_std_included:
         ax.set_xlabel('number of learning episodes')
     ax.set_ylabel('Average time steps')

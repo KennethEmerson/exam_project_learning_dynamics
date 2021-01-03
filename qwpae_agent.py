@@ -3,6 +3,7 @@ from internalmodel import InternalModel, InternalModelRandom
 from move import *
 import numpy as np
 
+
 class QwProposedAEAgent(Agent):
     def __init__(self, learning_rate: float, discount_rate: float, temperature: float, initial_state: State,
                  initial_q_value=0.0, theta=0.998849):
@@ -98,13 +99,7 @@ class QwRandomAEAgent(QwProposedAEAgent):
 
         :return: The predicted reward.
         """
-        #moves_probability = self.internal_model.get_action_prob(future_state)
-        #max_probability = max(moves_probability)
-        #return moves_probability[moves_probability.index(max_probability)]
-
-
-        return self.get_q_value_with_random_state(future_state,action,np.random.choice(NB_MOVES))
-
+        return self.get_q_value_with_random_state(future_state, action, np.random.choice(NB_MOVES))
 
 
 def test():
@@ -119,7 +114,7 @@ def test():
     print(action)
     new_pos = agent.compute_new_position(action, (-10, -10))
     new_state = State(new_pos, (10, 9))
-    agent.update(new_state, action, 5)
+    agent.update(new_state, action, 5, action)
 
     action = agent.choose_next_action()
     print(action)
