@@ -23,24 +23,24 @@ def simulation_figure_5():
     theta=0.998849
 
     # Use this for self model
-    config = HunterConfig_Std(name="Q-learning with self-model based estimation",
+    """config = HunterConfig_Std(name="Q-learning with self-model based estimation",
                                 agent_type= QwSelfModelBaseAEAgent,
                                 game=game,
                                 alpha= alpha,\
                                 gamma= gamma,\
                                 tau= tau,\
                                 initial_q=initial_q,\
-                                theta=0.998849)
+                                theta=0.998849)"""
     
     # Use this for QwPAE test run
-    """config = HunterConfig_Std(name="Q-learning with proposed action estimation",\
+    config = HunterConfig_Std(name="Q-learning with proposed action estimation",\
                           agent_type= QwProposedAEAgent,\
                           game= game,\
                           alpha= alpha,\
                           gamma= gamma,
                           tau= tau,\
                           initial_q= initial_q,\
-                          theta=0.998849)"""
+                          theta=0.998849)
 
     
     # simulation parameters
