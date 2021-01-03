@@ -139,10 +139,13 @@ class InternalSelfModel(InternalModelRandom):
     def get_state_action_estimation(self, state: State, action: int) -> float:
         others_state = State(state.other_rel_position, state.rel_position)
 
-        probas = [np.exp(sum(
+        """probas = [np.exp(sum(
             [self.agent.get_q_value_with_random_state(others_state, first_action, second_action) for second_action in
              range(NB_MOVES)])
-                         / self.agent.temperature) for first_action in range(NB_MOVES)]
+                         / self.agent.temperature) for first_action in range(NB_MOVES)]"""
+
+        probas = [np.exp(self.agent.get_q_value_with_random_state(others_state, other_action, action)
+                         / self.agent.temperature) for other_action in range(NB_MOVES)]
         tot = sum(probas)
 
         return probas[action] / tot
