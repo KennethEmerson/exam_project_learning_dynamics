@@ -28,22 +28,23 @@ def fig_3():
     patches = [ mpatches.Patch(color=colors[i], label=labels[i]) for i in range(len(labels)) ]
 
     # prey arrows
-    arrow = plt.arrow(2.5,  3.0, -0.5,  0.0, color=(0,0,0), width=0.02, length_includes_head=True, label='Possible Moves' )
-    plt.arrow(3.5,  3.0,  0.5,  0.0, color=(0,0,0), width=0.02, length_includes_head=True)
-    plt.arrow(3.0,  2.5,  0.0, -0.5, color=(0,0,0), width=0.02, length_includes_head=True)
-    plt.arrow(3.0,  3.5,  0.0,  0.5, color=(0,0,0), width=0.02, length_includes_head=True)
+    arrow = plt.arrow(2.5,  3.0, -0.5,  0.0, color=(0,0,0), width=0.02, length_includes_head=True, head_width=(4*0.02), label='Possible Moves' )
+    plt.arrow(2.5,  3.0, -0.5,  0.0, color=(1,1,1), width=0.02, length_includes_head=True, head_width=(4*0.02))
+    plt.arrow(3.5,  3.0,  0.5,  0.0, color=(1,1,1), width=0.02, length_includes_head=True, head_width=(4*0.02))
+    plt.arrow(3.0,  2.5,  0.0, -0.5, color=(1,1,1), width=0.02, length_includes_head=True, head_width=(4*0.02))
+    plt.arrow(3.0,  3.5,  0.0,  0.5, color=(1,1,1), width=0.02, length_includes_head=True, head_width=(4*0.02))
 
     # hunter_1 arrows
-    plt.arrow(3.5,  1.0, -0.5,  0.0, color=(0,0,0), width=0.02, length_includes_head=True)
-    plt.arrow(4.5,  1.0,  0.5,  0.0, color=(0,0,0), width=0.02, length_includes_head=True)
-    plt.arrow(4.0,  0.5,  0.0, -0.5, color=(0,0,0), width=0.02, length_includes_head=True)
-    plt.arrow(4.0,  1.5,  0.0,  0.5, color=(0,0,0), width=0.02, length_includes_head=True)
+    plt.arrow(3.5,  1.0, -0.5,  0.0, color=(1,1,1), width=0.02, length_includes_head=True, head_width=(4*0.02))
+    plt.arrow(4.5,  1.0,  0.5,  0.0, color=(1,1,1), width=0.02, length_includes_head=True, head_width=(4*0.02))
+    plt.arrow(4.0,  0.5,  0.0, -0.5, color=(1,1,1), width=0.02, length_includes_head=True, head_width=(4*0.02))
+    plt.arrow(4.0,  1.5,  0.0,  0.5, color=(1,1,1), width=0.02, length_includes_head=True, head_width=(4*0.02))
 
     # hunter_2 arrows
-    plt.arrow(0.0,  3.5,  0.0, -0.5, color=(0,0,0), width=0.02, length_includes_head=True)
-    plt.arrow(0.0,  4.5,  0.0,  0.5, color=(0,0,0), width=0.02, length_includes_head=True)
-    plt.arrow(0.5,  4.0,  0.5,  0.0, color=(0,0,0), width=0.02, length_includes_head=True)
-    plt.arrow(6.5,  4.0, -0.5,  0.0, color=(0,0,0), width=0.02, length_includes_head=True)
+    plt.arrow(0.0,  3.5,  0.0, -0.5, color=(1,1,1), width=0.02, length_includes_head=True, head_width=(4*0.02))
+    plt.arrow(0.0,  4.5,  0.0,  0.5, color=(1,1,1), width=0.02, length_includes_head=True, head_width=(4*0.02))
+    plt.arrow(0.5,  4.0,  0.5,  0.0, color=(1,1,1), width=0.02, length_includes_head=True, head_width=(4*0.02))
+    plt.arrow(6.5,  4.0, -0.5,  0.0, color=(1,1,1), width=0.02, length_includes_head=True, head_width=(4*0.02))
 
     patches.append(arrow)
     plt.legend(handles=patches, loc=9, bbox_to_anchor=(0.5, -0.06), borderaxespad=0. , ncol=3, handler_map={mpatches.FancyArrow : HandlerPatch(patch_func=make_legend_arrow),}),
@@ -81,5 +82,5 @@ def fig_4():
     im2 = ax2.imshow(data)
 
     plt.show()
-# fig_3()
-fig_4()
+fig_3()
+# fig_4()
