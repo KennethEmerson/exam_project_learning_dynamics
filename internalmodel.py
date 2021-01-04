@@ -1,7 +1,7 @@
 import numpy as np
 
-from agent import State, Agent
-from move import *
+from agent.agent import State
+from agent.move import *
 
 
 class InternalModel:

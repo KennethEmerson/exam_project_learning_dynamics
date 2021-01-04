@@ -1,5 +1,5 @@
 from game import is_prey_caught_heterogeneous
-from simulation import *
+from simulation.simulation import *
 
 
 def simulation_figure_5():

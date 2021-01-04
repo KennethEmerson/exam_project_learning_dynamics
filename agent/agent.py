@@ -1,5 +1,5 @@
 import numpy as np
-from move import *
+from agent.move import *
 
 
 class State:

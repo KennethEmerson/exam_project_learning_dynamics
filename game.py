@@ -1,6 +1,6 @@
 import numpy as np
-from agent import State
-from move import *
+from agent.agent import State
+from agent.move import *
 
 
 def is_prey_caught_homogeneous(x1: int, y1: int, x2: int, y2: int) -> (bool, bool):

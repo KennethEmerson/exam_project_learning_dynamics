@@ -5,7 +5,7 @@ import numpy as np
 from matplotlib.animation import FuncAnimation
 
 from game import Game
-from simulation import HunterConfig
+from simulatio import HunterConfig
 
 
 def game_showcase(game: Game, hunter_config: HunterConfig):

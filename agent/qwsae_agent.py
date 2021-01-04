@@ -1,7 +1,7 @@
-from agent import State
+from agent.agent import State
 from internalmodel import InternalSelfModel
 
-from qwpae_agent import QwProposedAEAgent
+from agent.qwpae_agent import QwProposedAEAgent
 
 
 class QwSelfModelBaseAEAgent(QwProposedAEAgent):

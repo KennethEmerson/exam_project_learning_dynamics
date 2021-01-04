@@ -1,6 +1,6 @@
-from agent import State, Agent
+from agent.agent import State, Agent
 from internalmodel import InternalModel, InternalModelRandom
-from move import *
+from agent.move import *
 import numpy as np
 
 

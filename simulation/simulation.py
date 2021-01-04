@@ -3,9 +3,9 @@ from datetime import datetime
 
 import numpy as np
 
-from centralized_agent import Centralized_Agent, Agent_Interface
+from agent.centralized_agent import Centralized_Agent, Agent_Interface
 from game import Game
-from qwpae_agent import QwProposedAEAgent
+from agent.qwpae_agent import QwProposedAEAgent
 
 
 class HunterConfig:

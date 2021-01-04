@@ -1,6 +1,6 @@
 from game import is_prey_caught_homogeneous
-from qwpae_agent import QwRandomAEAgent
-from simulation import *
+from agent.qwsae_agent import QwSelfModelBaseAEAgent
+from simulation.simulation import *
 
 
 def simulation_figure_5():
@@ -21,14 +21,15 @@ def simulation_figure_5():
     initial_q = 0.0
     theta = 0.998849
 
-    # Use this for Centralized learning
-    """config = Centralized_Config_Std(name="Centralized Q-learning",
-                                game=game,
-                                alpha= alpha,
-                                gamma= gamma,
-                                tau= tau,
-                                initial_q=initial_q,
-                                theta=0.998849)"""
+    # Use this for self model
+    config = HunterConfig_Std(name="Q-learning with self-model based estimation",
+                              agent_type=QwSelfModelBaseAEAgent,
+                              game=game,
+                              alpha=alpha,
+                              gamma=gamma,
+                              tau=tau,
+                              initial_q=initial_q,
+                              theta=0.998849)
 
     # Use this for QwPAE test run
     """config = HunterConfig_Std(name="Q-learning with proposed action estimation",
@@ -39,16 +40,6 @@ def simulation_figure_5():
                           tau= tau,
                           initial_q= initial_q,
                           theta=0.998849)"""
-
-    # Use this for QwRAE test run
-    config = HunterConfig_Std(name="Q-learning with randomly action estimation",
-                              agent_type=QwRandomAEAgent,
-                              game=game,
-                              alpha=alpha,
-                              gamma=gamma,
-                              tau=tau,
-                              initial_q=initial_q,
-                              theta=0.998849)
 
     # simulation parameters
     train_episodes_batch = 10
