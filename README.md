@@ -1,4 +1,4 @@
-# Multi-Agent Reinforcement Learning: An Approach Based on the Other Agent's Internal Model
+# Paper review: Multi-Agent Reinforcement Learning: An Approach Based on the Other Agent's Internal Model
 
 ## Description
 
