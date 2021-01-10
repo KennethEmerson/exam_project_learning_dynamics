@@ -10,11 +10,11 @@ Description:
     authors of that paper.
 """
 
-import sim
+import simulation
 
 
 def main():
-    sim.test_centralized_learner(10, 100, 2000)
+    simulation.test_centralized_learner(10, 100, 2000)
 
 
 main()
