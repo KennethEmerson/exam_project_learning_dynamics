@@ -1,7 +1,6 @@
 import numpy as np
-from agent.agent import State, Agent
-from agent.move import NB_MOVES
-
+from agent import State, Agent
+from move import *
 
 class Agent_Interface:
     """

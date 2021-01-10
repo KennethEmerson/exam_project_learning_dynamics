@@ -1,5 +1,5 @@
 from game import is_prey_caught_homogeneous
-from simulation.simulation import *
+from simulation import *
 
 
 def simulation_figure_5():
@@ -52,7 +52,7 @@ def simulation_figure_5():
                           initial_q= initial_q,
                           theta=0.998849)"""
 
-    # simulation parameters
+    # sim parameters
     train_episodes_batch = 10
     eval_episodes = 100
     total_train_episodes = 2000

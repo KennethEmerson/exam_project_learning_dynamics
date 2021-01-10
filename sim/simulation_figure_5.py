@@ -1,5 +1,6 @@
-from game import is_prey_caught_heterogeneous
-from simulation.simulation import *
+from game import is_prey_caught_homogeneous
+from qwpae_agent import QwRandomAEAgent
+from simulation import *
 
 
 def simulation_figure_5():
@@ -7,7 +8,7 @@ def simulation_figure_5():
     # game parameters:
 
     playing_field = (7, 7)
-    is_prey_caught_function = is_prey_caught_heterogeneous
+    is_prey_caught_function = is_prey_caught_homogeneous
     reward_all = 1
     penalty_all = 0
 
@@ -20,9 +21,8 @@ def simulation_figure_5():
     initial_q = 0.0
     theta = 0.998849
 
-    # Use this for self model
-    """config = HunterConfig_Std(name="Q-learning with self-model based estimation",
-                                agent_type= QwSelfModelBaseAEAgent,
+    # Use this for Centralized learning
+    """config = Centralized_Config_Std(name="Centralized Q-learning",
                                 game=game,
                                 alpha= alpha,
                                 gamma= gamma,
@@ -31,8 +31,18 @@ def simulation_figure_5():
                                 theta=0.998849)"""
 
     # Use this for QwPAE test run
-    config = HunterConfig_Std(name="Q-learning with proposed action estimation",
-                              agent_type=QwProposedAEAgent,
+    """config = HunterConfig_Std(name="Q-learning with proposed action estimation",
+                          agent_type= QwProposedAEAgent,
+                          game= game,
+                          alpha= alpha,
+                          gamma= gamma
+                          tau= tau,
+                          initial_q= initial_q,
+                          theta=0.998849)"""
+
+    # Use this for QwRAE test run
+    config = HunterConfig_Std(name="Q-learning with randomly action estimation",
+                              agent_type=QwRandomAEAgent,
                               game=game,
                               alpha=alpha,
                               gamma=gamma,
@@ -40,7 +50,7 @@ def simulation_figure_5():
                               initial_q=initial_q,
                               theta=0.998849)
 
-    # simulation parameters
+    # sim parameters
     train_episodes_batch = 10
     eval_episodes = 100
     total_train_episodes = 2000

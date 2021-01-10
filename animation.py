@@ -1,11 +1,9 @@
-import pickle
-
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.animation import FuncAnimation
 
 from game import Game
-from simulation.simulation import HunterConfig
+from simulation import *
 
 
 def game_showcase(game: Game, hunter_config: HunterConfig):
@@ -82,4 +80,4 @@ if __name__ == "__main__":
     penalty = -1
 
     game = Game(playing_field, reward, penalty)
-    showcase_from_file(game, "hunters_Centralized_02012021_0053.bin")
+    showcase_from_file(game, "results/figure7_with_STD/hunters_Q-learning with self-model based estimation_03012021_0130.bin")

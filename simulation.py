@@ -3,9 +3,9 @@ from datetime import datetime
 
 import numpy as np
 
-from agent.centralized_agent import Centralized_Agent, Agent_Interface
+from centralized_agent import Centralized_Agent, Agent_Interface
 from game import Game
-from agent.qwpae_agent import QwProposedAEAgent
+from qwpae_agent import QwProposedAEAgent
 
 
 class HunterConfig:
@@ -134,7 +134,7 @@ def do_evaluation_episode(game: Game, hunters: tuple) -> int:
 def simulation(game: Game, hunter_config: HunterConfig, train_episodes_batch: int, eval_episodes: int,
                total_train_episodes: int):
     """
-    Launch the complete simulation (i.e. training and estimation) for one set
+    Launch the complete sim (i.e. training and estimation) for one set
     of hunters. The result is stored into the hunter configuration.
 
     :param game: The game played.
@@ -218,7 +218,7 @@ def save_results(hunter_config: HunterConfig, total_train_episodes: int):
 
 def start_simulation(train_episodes_batch=10, eval_episodes=100, total_train_episodes=2000):
     """
-    Launch the simulation (and training) and saves test results in CSV
+    Launch the sim (and training) and saves test results in CSV
     and hunters in bin file.
     """
     playing_field = (7, 7)

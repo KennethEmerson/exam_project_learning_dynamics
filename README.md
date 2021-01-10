@@ -37,7 +37,7 @@ python main.py
 If you want to reproduce our results, you will need to use the corresponding simulation contained within the simulation/ directory. This can be done by starting a terminal on the main directory and then start the simulation that interest you (let's say simulation_figure_X.py) in the following way:
 
 ```sh
-python -m simulation.simulation_figure_X
+python -m sim.simulation_figure_X
 ```
 
 The simulation figures numbers correspond to the ones in the original paper of Nagayuki et al. (2000). The numbers correspond to:
