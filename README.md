@@ -2,7 +2,7 @@
 
 ## Description
 
-This repository contains all the that was code used to analyze and try to replicate the results of Nagayuki, Y., Ishii, S., and Doya, K. paper, "Multi-agent reinforcement
+This repository contains all the code that was used to analyze and try to replicate the results of Nagayuki, Y., Ishii, S., and Doya, K. paper, "Multi-agent reinforcement
 learning: an approach based on the other agent's internal model.", 2000, In Proceedings Fourth International Conference on MultiAgent Systems, pages 215–221.
 
 This review is done in the context of the Learning Dynamics course, given jointly by the Université Libre de Bruxelles and Vrije Universiteit Brussel in Belgium.
