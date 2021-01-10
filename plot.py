@@ -121,8 +121,8 @@ if __name__ == "__main__":
     # add filenames in list which you want on plot
     # both CSV results and hunterconfig binary files can be used
     file_list = [
-        "hunters_Q-learning with randomly action estimation_02012021_2200.bin",
-        "hunters_Q-learning with proposed action estimation_02012021_2041.bin",
-        "hunters_Centralized Q-learning_02012021_2115.bin",
+        "results/figure5_V2_with_STD/hunters_Centralized Q-learning_02012021_2115.bin",
+        "results/figure5_V2_with_STD/hunters_Q-learning with proposed action estimation_02012021_2041.bin",
+        "results/figure5_V2_with_STD/hunters_Q-learning with randomly action estimation_02012021_2200.bin",
     ]
     plot_graph(file_list)

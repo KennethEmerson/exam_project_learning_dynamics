@@ -50,7 +50,7 @@ def game_showcase(game: Game, hunter_config: HunterConfig):
         ax.imshow(data)
         return [ax]
 
-    ani = FuncAnimation(fig, animate, interval=200, blit=True)
+    ani = FuncAnimation(fig, animate, interval=750, blit=True)
     plt.show()
 
 
@@ -80,4 +80,4 @@ if __name__ == "__main__":
     penalty = -1
 
     game = Game(playing_field, reward, penalty)
-    showcase_from_file(game, "results/figure7_with_STD/hunters_Q-learning with self-model based estimation_03012021_0130.bin")
+    showcase_from_file(game, "results/figure5_V2_with_STD/hunters_Q-learning with proposed action estimation_02012021_2041.bin")
